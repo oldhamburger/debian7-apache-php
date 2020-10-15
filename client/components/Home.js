@@ -20,4 +20,32 @@ class Home extends Component {
           </h4> */}
             <img
               src="/homeLogo.png"
-      
+              height="250"
+              style={{ display: 'block', margin: 'auto' }}
+            />
+            <div className="par">sprig has sprung</div>
+            <br />
+            <div className="spacer3">
+              <div className="s6 rowz ">
+                <Link
+                  to="/register"
+                  style={{
+                    width: '240px',
+                    borderRadius: '3px',
+                    letterSpacing: '1.5px',
+                  }}
+                  className="btn btn-large waves-effect waves-light hoverable btnThings accent-3"
+                  id="register"
+                >
+                  Register
+                </Link>
+              </div>
+              <div className=" s6 rowz">
+                <Link
+                  to="/login"
+                  style={{
+                    width: '240px',
+                    borderRadius: '3px',
+                    letterSpacing: '1.5px',
+                  }}
+                  className="btn btn-larg
