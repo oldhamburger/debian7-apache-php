@@ -94,4 +94,41 @@ class Login extends React.Component {
                     type="password"
                     name="password"
                     value={this.state.password}
-           
+                    onChange={this.handleChange}
+                    required
+                  />
+                </label>
+                <input
+                  className="btn btn-large waves-effect waves-light hoverable btnThings accent-3"
+                  style={{
+                    marginTop: '10px',
+                  }}
+                  type="submit"
+                  value="Log In"
+                  id="registerTwo"
+                />
+                <p className="grey-text text-darken-1">
+                  Don't have an account? <Link to="/Register">Register</Link>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = state => ({
+  currentUser: state.user,
+  isAuthenticated: state.userReducer.isAuthenticated,
+});
+
+const mapDispatchToProps = dispatch => ({
+  loggedInUser: user => dispatch(loggedInUser(user)),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Login);
