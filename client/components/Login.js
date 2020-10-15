@@ -64,4 +64,34 @@ class Login extends React.Component {
             Welcome User!
           </h3>
           <h6
-    
+            style={{ textAlign: 'center', fontFamily: 'Raleway', color: 'red' }}
+          >
+            {this.state.errMessage}
+          </h6>
+          <div
+            style={{
+              marginTop: '5rem',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+            className="row"
+          >
+            <div className="col">
+              <form className="form" onSubmit={this.handleSubmit}>
+                <label>
+                  Email:
+                  <input
+                    type="text"
+                    name="email"
+                    value={this.state.email}
+                    onChange={this.handleChange}
+                    required
+                  />
+                </label>
+                <label>
+                  Password:
+                  <input
+                    type="password"
+                    name="password"
+                    value={this.state.password}
+           
