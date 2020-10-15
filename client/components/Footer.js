@@ -21,4 +21,21 @@ class Footer extends React.Component {
                 <a href="/dashboard">
                   <p className="grey-text text-lighten-4">Dashboard</p>
                 </a>
-   
+              </div>
+              <div>
+                <p className="grey-text text-lighten-4">
+                  Made on the 25th floor
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="footer-copyright">
+            <div>© 2019 Sprig Incorporated</div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+}
+
+export default Footer;
