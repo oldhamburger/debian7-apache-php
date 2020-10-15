@@ -25,4 +25,43 @@ class Login extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-   
+    if (nextProps.isAuthenticated) {
+      this.props.history.push({
+        pathname: '/dashboard',
+      });
+    }
+    if (nextProps.errors) {
+      this.setState({
+        errors: nextProps.errors,
+      });
+    }
+  }
+
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+  async handleSubmit(event) {
+    //this is where we wanna map dispatch the thunk?
+    event.preventDefault();
+    await this.props.loggedInUser(this.state);
+    if (!this.props.isAuthenticated) {
+      this.setState({
+        errMessage: 'The email and/or password you entered is incorrect',
+        email: '',
+        password: '',
+      });
+    }
+  }
+  render() {
+    return (
+      <div>
+        <Link to="/" className="btn-flat waves-effect">
+          <HomeIcon style={{ fontSize: 40, marginTop: '3px' }} />
+        </Link>
+
+        <div className="container">
+          <h3 style={{ textAlign: 'center', fontFamily: 'Raleway' }}>
+            Welcome User!
+          </h3>
+          <h6
+    
