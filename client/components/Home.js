@@ -48,4 +48,17 @@ class Home extends Component {
                     borderRadius: '3px',
                     letterSpacing: '1.5px',
                   }}
-                  className="btn btn-larg
+                  className="btn btn-large waves-effect waves-light hoverable btnThings accent-3"
+                  id="login"
+                >
+                  Log In
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+export default Home;
