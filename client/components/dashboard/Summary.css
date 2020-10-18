@@ -6,4 +6,59 @@
   margin-top: 75px;
   margin-right: 25px;
   margin-left: 25px;
-  pa
+  padding: 10px;
+}
+
+.header {
+  text-align: center !important;
+  color: rgb(113, 113, 113) !important;
+  font-size: 16px !important;
+  font-family: 'Raleway', sans-serif !important;
+}
+.headerLeft {
+  color: rgb(113, 113, 113) !important;
+  font-size: 16px !important;
+  font-family: 'Raleway', sans-serif !important;
+}
+.cell {
+  color: rgb(92, 92, 92) !important;
+  font-size: 14px !important;
+  text-align: center !important;
+  font-family: 'Raleway', sans-serif !important;
+}
+.cellLeft {
+  color: rgb(92, 92, 92) !important;
+  font-size: 14px !important;
+  font-family: 'Raleway', sans-serif !important;
+}
+
+.table {
+  max-width: 600px;
+  background-color: rgb(240, 240, 240);
+  border-collapse: collapse;
+}
+.paper {
+  text-align: center;
+
+  padding: 10px;
+}
+
+/* TRANSACTION TABLE  */
+.tabletrans {
+  margin-left: 50px;
+  background-color: rgb(214, 214, 214);
+}
+
+/* LOGIN */
+.logInPage {
+  margin: 200px;
+}
+/* HOME PAGE */
+.main-btn {
+  width: 185px;
+  letter-spacing: 1.5px;
+  border-radius: 3px;
+  margin-top: 1rem;
+}
+
+.btn
