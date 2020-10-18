@@ -101,4 +101,11 @@ const mapDispatchToProps = dispatch => ({
     dispatch(gettingBalance(plaidAccountData)),
   getLargest: props => dispatch(getLargest(props)),
   getRestaurantSpend: props => dispatch(getRestaurantSpend(props)),
-  g
+  getMerchantSpend: props => dispatch(getMerchantSpend(props)),
+  getTranspoSpend: props => dispatch(getTranspoSpend(props)),
+  getFees: props => dispatch(getFees(props))
+});
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Dashboard);
