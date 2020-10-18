@@ -61,4 +61,18 @@
   margin-top: 1rem;
 }
 
-.btn
+.btn:hover {
+  opacity: 0.8;
+}
+
+@keyframes float {
+  0% {
+    transform: translatey(0px);
+  }
+  50% {
+    transform: translatey(-10px);
+  }
+  100% {
+    transform: translatey(0px);
+  }
+}
