@@ -66,4 +66,39 @@ class Dashboard extends Component {
               <Footer />
             </div>
           </div>
-        ) : this.state.loading && !this.props.accou
+        ) : this.state.loading && !this.props.accounts.length ? (
+          <div>
+            <Navbar />
+            <br />
+            <br />
+
+            <ConnectedPlaidAccount />
+            <h4 className="header">Please link an account to continue</h4>
+            <Footer />
+          </div>
+        ) : (
+          <div className="loading">
+            <Loading />
+            <h2 className="loading">Crunching the numbers</h2>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = state => ({
+  user: state.userReducer,
+  accounts: state.accountReducer.accounts,
+  transactions: state.accountReducer.transactions
+});
+const mapDispatchToProps = dispatch => ({
+  gettingTransactions: plaidAccountData =>
+    dispatch(gettingTransactions(plaidAccountData)),
+  gettingAccounts: () => dispatch(gettingAccounts()),
+  logoutUser: () => dispatch(logoutUser()),
+  gettingBalance: plaidAccountData =>
+    dispatch(gettingBalance(plaidAccountData)),
+  getLargest: props => dispatch(getLargest(props)),
+  getRestaurantSpend: props => dispatch(getRestaurantSpend(props)),
+  g
