@@ -49,4 +49,37 @@ class Summary extends React.Component {
                       onClick={() => {
                         if (
                           window.confirm(
-             
+                            'Are you sure you wish to delete this bank account'
+                          )
+                        )
+                          this.handleRemove(row.accountName);
+                      }}
+                    />
+                    {''}
+                    {row.accountName}
+                  </TableCell>
+                  <TableCell className="cell">${row.Checking}</TableCell>
+                  <TableCell className="cell">${row.Savings}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+      </div>
+    );
+  }
+}
+
+const mapState = state => ({
+  accounts: state.accountReducer.accounts,
+  balance: state.accountReducer.balance,
+});
+
+const mapDispatchToProps = dispatch => ({
+  deletingAccount: accountId => dispatch(deletingAccount(accountId)),
+});
+
+export default connect(
+  mapState,
+  mapDispatchToProps
+)(Summary);
