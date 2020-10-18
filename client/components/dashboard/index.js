@@ -35,4 +35,35 @@ class Dashboard extends Component {
     await this.props.gettingAccounts();
     const { accounts } = this.props;
     if (this.props.accounts.length) {
- 
+      await this.props.gettingTransactions(accounts);
+      this.props.getLargest(this.props.transactions);
+      this.props.getRestaurantSpend(this.props.transactions);
+      this.props.getMerchantSpend(this.props.transactions);
+      this.props.getTranspoSpend(this.props.transactions);
+      await this.props.gettingBalance(this.props.accounts);
+      this.setState({ loading: true });
+    } else {
+      this.setState({ loading: true });
+    }
+  }
+  render() {
+    return (
+      <div>
+        {this.state.loading && this.props.accounts.length ? (
+          <div>
+            <div className="index">
+              <Summary />
+              <ConnectedPlaidAccount />
+              <div className="lrg">
+                <div className="insightCont">
+                  <CategoriesDonut />
+                </div>
+                <InsightCard />
+              </div>
+
+              <PlaidAccountTransactions />
+
+              <Footer />
+            </div>
+          </div>
+        ) : this.state.loading && !this.props.accou
