@@ -1,0 +1,9 @@
+.root {
+  display: flex;
+  justify-content: center;
+  background-color: rgb(240, 240, 240) !important;
+  overflow-x: auto;
+  margin-top: 75px;
+  margin-right: 25px;
+  margin-left: 25px;
+  pa
