@@ -21,4 +21,32 @@ class Summary extends React.Component {
 
   handleRemove = async accountName => {
     const targetAccount = this.props.accounts.filter(
-      elem => elem.instit
+      elem => elem.institutionName === accountName
+    );
+    let accountId = targetAccount[0]._id;
+    await this.props.deletingAccount(accountId);
+    window.location.reload();
+  };
+  async componentDidMount() {}
+  render() {
+    const balanceData = balancesCondensed(this.props.balance);
+    return (
+      <div>
+        <Paper className="root">
+          <Table className="table">
+            <TableHead>
+              <TableRow className="row">
+                <TableCell className="headerLeft">Bank Name </TableCell>
+                <TableCell className="header">Checking</TableCell>
+                <TableCell className="header">Savings</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {balanceData.map((row, ind) => (
+                <TableRow key={ind}>
+                  <TableCell className="cellLeft" component="th" scope="row">
+                    <DeleteOutlinedIcon
+                      onClick={() => {
+                        if (
+                          window.confirm(
+             
