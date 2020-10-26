@@ -63,4 +63,35 @@ class LineGraph extends React.Component {
   constructor() {
     super();
     this.state = { data: data };
-    this.populateData
+    this.populateData = this.populateData.bind(this);
+  }
+  async componentDidMount() {
+    await this.props.gettingAccounts();
+    const { accounts } = this.props;
+    await this.props.getThreeMonthsDataCategory(accounts);
+    this.populateData();
+  }
+
+  populateData() {
+    if (this.props.threeMonthsCategory.length) {
+      let catsArray = ['Food and Drink', 'Shops', 'Travel', 'Recreation'];
+      let lineData = this.props.threeMonthsCategory;
+      lineData.map((elem, index) => {
+        console.log('elem', elem);
+        let label = Object.keys(elem)[0];
+        if (!data.labels.includes(label)) {
+          data.labels.push(label);
+        }
+        elem[label].labels.map((categories, ind) => {
+          let catIndex = catsArray.indexOf(categories);
+          data.datasets[catIndex].data[index] +=
+            Math.round(elem[label].spend[ind] * 100) / 100;
+        });
+      });
+      this.setState({ data: data });
+    }
+  }
+  render() {
+    return this.props.threeMonthsCategory.length ? (
+      <div>
+        <Line data={data} options={options} heig
