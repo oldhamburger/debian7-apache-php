@@ -47,4 +47,30 @@ class InsightsPage extends Component {
           </div>
         ) : (
           <div className="loading">
-   
+            <Loading />
+            <h2 className="loading">Calculating insights</h2>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+const mapState = state => ({
+  accounts: state.accountReducer.accounts,
+  threeMonthsData: state.insightReducer.threeMonthsData,
+  transactions: state.accountReducer.transactions,
+});
+
+const mapDispatchToProps = dispatch => ({
+  getThreeMonthsData: plaidAccountData =>
+    dispatch(getThreeMonthsData(plaidAccountData)),
+  gettingAccounts: () => dispatch(gettingAccounts()),
+  gettingTransactions: plaidAccountData =>
+    dispatch(gettingTransactions(plaidAccountData)),
+});
+
+export default connect(
+  mapState,
+  mapDispatchToProps
+)(InsightsPage);
