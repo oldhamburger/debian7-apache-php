@@ -35,4 +35,21 @@ const options = {
   },
 };
 
-export default class 
+export default class BarGraph extends React.Component {
+  constructor() {
+    super();
+  }
+  render() {
+    if (this.props.threeMonthsData) {
+      const barInfo = condenseTotalMonthly(this.props.threeMonthsData[0]);
+      barInfo.total = barInfo.total.map(elem => Math.round(elem * 100) / 100);
+      data.datasets[0].data = barInfo.total;
+      data.labels = barInfo.labels;
+    }
+    return (
+      <div className="barGraphContainer">
+        <Bar data={data} options={options} height={400} width={450} />
+      </div>
+    );
+  }
+}
