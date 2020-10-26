@@ -94,4 +94,26 @@ class LineGraph extends React.Component {
   render() {
     return this.props.threeMonthsCategory.length ? (
       <div>
-        <Line data={data} options={options} heig
+        <Line data={data} options={options} height={400} width={450} />
+      </div>
+    ) : (
+      <div />
+    );
+  }
+}
+
+const mapState = state => ({
+  accounts: state.accountReducer.accounts,
+  threeMonthsCategory: state.insightReducer.threeMonthsCategory,
+});
+
+const mapDispatchToProps = dispatch => ({
+  gettingAccounts: () => dispatch(gettingAccounts()),
+  getThreeMonthsDataCategory: plaidAccountData =>
+    dispatch(getThreeMonthsDataCategory(plaidAccountData)),
+});
+
+export default connect(
+  mapState,
+  mapDispatchToProps
+)(LineGraph);
