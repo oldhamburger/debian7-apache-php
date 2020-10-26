@@ -42,4 +42,35 @@ export const allCategorySpend = transactions => {
   let spend = [];
   transactions.map(elem => {
     if (
-      !labels.includes(elem.c
+      !labels.includes(elem.category[0]) &&
+      !elem.category.includes('Payment') &&
+      !elem.category.includes('Transfer')
+    ) {
+      labels.push(elem.category[0]);
+      spend.push(getCategorySpend(transactions, elem.category[0]));
+    }
+  });
+  return { labels, spend };
+};
+
+//this function uses the fetched data from the balances and filters it to show only
+//Checking and Savings accounts only
+export const fetchBalanceSummary = balances => {
+  return balances.map(elem => {
+    elem.balance = elem.balance.filter(ele => {
+      return ele.name === 'Plaid Checking' || ele.name === 'Plaid Saving';
+    });
+    return elem;
+  });
+};
+
+//this uses fetchBalanceSummary to condense everything so make sure
+//when we call this function we are sending in the ORIGINAL DATA FROM PLAID
+export const balancesCondensed = arr => {
+  const newArray = fetchBalanceSummary(arr);
+  let result = [];
+  for (let i = 0; i < newArray.length; i++) {
+    let obj = {};
+    obj.accountName = newArray[i].accountName;
+    let balanceArray = newArray[i].balance;
+    obj.Checking = balanceArray[0].balances.
