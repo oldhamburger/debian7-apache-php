@@ -190,4 +190,33 @@ export const totalMonthly = data => {
 
 //this will give an object where the labels is an array of months
 //and the total is an array of all the total per month
-//the obj it 
+//the obj it takes in is the result of calling totalMonthly
+export const condenseTotalMonthly = obj => {
+  let newObj = {};
+  let labels = Object.keys(obj);
+  let total = Object.values(obj);
+  newObj.labels = labels;
+  newObj.total = total;
+  return newObj;
+};
+
+//counter is basically getting the fullMonth until counter months before
+export const getMonth = (transactions, counter) => {
+  const d = new Date();
+  let currentYear = d.getFullYear().toString();
+  let monthNumber = Number(d.getMonth()) - counter;
+  let monthNum = monthNumber.toString();
+  if (monthNum.length === 1) {
+    monthNum = '0' + monthNum;
+  } else if (Number(monthNum) < 4) {
+    monthNum = (Number(monthNum) + 12).toString();
+  }
+  const fullDate = currentYear + '-' + monthNum;
+  return fullDate;
+};
+
+//this will give -- based on the month that is being passed on fullDate, will return an
+//array of all the transaction objects in that month
+export const getMonthsSpending = (transactions, counter) => {
+  const fullDate = getMonth(transactions, counter);
+  let newTrans = transaction
