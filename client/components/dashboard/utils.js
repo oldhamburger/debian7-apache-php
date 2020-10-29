@@ -111,4 +111,46 @@ export const largestByMerchant = transactionProps => {
   return largest;
 };
 
-export const 
+export const subscriptionFinder = transactions => {
+  const shortList = {};
+
+  for (let i = 0; i < transactions.length; i++) {
+    let current = transactions[i];
+    if (!shortList[current.name]) {
+      shortList[current.name] = {
+        num: 1,
+        charge: current.amount,
+        date: current.date.slice(8),
+        accountName: current.accountName,
+      };
+    } else {
+      if (
+        shortList[current.name].charge === current.amount &&
+        shortList[current.name].date === current.date.slice(8) &&
+        shortList[current.name].accountName === current.accountName
+      ) {
+        shortList[current.name].num++;
+      }
+    }
+  }
+  let finalList = [];
+  for (let key in shortList) {
+    if (shortList[key].num === 3) {
+      finalList.push({
+        name: shortList[key].name,
+        amount: shortList[key].amount,
+      });
+    }
+  }
+  return finalList;
+};
+
+//call simplifiedMonthly first
+const dict = {
+  '01': 'January',
+  '02': 'February',
+  '03': 'March',
+  '04': 'April',
+  '05': 'May',
+  '06': 'June',
+  '07
