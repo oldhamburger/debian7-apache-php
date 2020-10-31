@@ -45,4 +45,20 @@ export default function(state = initialState, action) {
         budget: action.budgetData,
         spendingLimit:
           Math.round(
-            (Number(action.monthlyIncome) - Number(actio
+            (Number(action.monthlyIncome) - Number(action.budgetData)) * 100
+          ) / 100,
+      };
+    case GET_BUDGET:
+      return {
+        ...state,
+        budget: action.budget,
+        spendingLimit:
+          Math.round(
+            (Number(action.monthlyIncome) - Number(action.budget)) * 100
+          ) / 100,
+      };
+
+    default:
+      return state;
+  }
+}
