@@ -253,4 +253,7 @@ export const finalLineGraphData = transactions => {
   return arr.map(elem => {
     let ret = allCategorySpend(elem.trans);
     let returned = {};
-    returned[elem.date] = 
+    returned[elem.date] = ret;
+    return returned;
+  });
+};
