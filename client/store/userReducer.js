@@ -72,4 +72,20 @@ export default function(state = initialState, action) {
     case CREATE_USER:
       return {
         ...state,
-        user: ac
+        user: action.user,
+      };
+    case GET_CURRENT_USER:
+      return {
+        ...state,
+        user: action.user,
+        isAuthenticated: !isEmpty(action.user),
+      };
+    case GET_ERRORS:
+      return {
+        ...state,
+        errors: action.err,
+      };
+    default:
+      return state;
+  }
+}
