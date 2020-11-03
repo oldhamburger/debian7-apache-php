@@ -34,4 +34,42 @@ export const getErrors = err => ({
 //Thunk - for user registration
 export const createdUser = user => async dispatch => {
   try {
-    const { data } = aw
+    const { data } = await axios.post('/api/users/register', user);
+    dispatch(createUser(data));
+    dispatch(getErrors('No errors'));
+  } catch (err) {
+    dispatch(getErrors(err.response.data));
+  }
+};
+//Thunk - for user login
+export const loggedInUser = user => async dispatch => {
+  try {
+    const res = await axios.post('/api/users/login', user);
+
+    const token = res.data.token;
+    localStorage.setItem('jwt', token);
+    setAuthToken(token);
+    const data = jwtDecode(token);
+    dispatch(fetchUser(data));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const logoutUser = () => dispatch => {
+  // Remove token from local storage
+  localStorage.removeItem('jwt');
+  // Remove auth header for future requests
+  setAuthToken(false);
+  // Set current user to empty object {} which will set isAuthenticated to false
+  dispatch(fetchUser({}));
+};
+
+//reducer
+
+export default function(state = initialState, action) {
+  switch (action.type) {
+    case CREATE_USER:
+      return {
+        ...state,
+        user: ac
