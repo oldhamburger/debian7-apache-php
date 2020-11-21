@@ -3190,3 +3190,1016 @@ var options = {
       right: 50,
       top: 50,
       bottom: 40
+    },
+    maintainAspectRatio: false,
+    responsive: true
+  }
+};
+
+var BarGraph =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(BarGraph, _React$Component);
+
+  function BarGraph() {
+    _classCallCheck(this, BarGraph);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(BarGraph).call(this));
+  }
+
+  _createClass(BarGraph, [{
+    key: "render",
+    value: function render() {
+      if (this.props.threeMonthsData) {
+        var barInfo = Object(_utils__WEBPACK_IMPORTED_MODULE_2__["condenseTotalMonthly"])(this.props.threeMonthsData[0]);
+        barInfo.total = barInfo.total.map(function (elem) {
+          return Math.round(elem * 100) / 100;
+        });
+        data.datasets[0].data = barInfo.total;
+        data.labels = barInfo.labels;
+      }
+
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "barGraphContainer"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_chartjs_2__WEBPACK_IMPORTED_MODULE_1__["Bar"], {
+        data: data,
+        options: options,
+        height: 400,
+        width: 450
+      }));
+    }
+  }]);
+
+  return BarGraph;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+
+
+/***/ }),
+
+/***/ "./client/components/dashboard/insights/InsightCards.js":
+/*!**************************************************************!*\
+  !*** ./client/components/dashboard/insights/InsightCards.js ***!
+  \**************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _cards__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./cards */ "./client/components/dashboard/insights/cards.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+var InsightCard =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(InsightCard, _Component);
+
+  function InsightCard() {
+    _classCallCheck(this, InsightCard);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(InsightCard).apply(this, arguments));
+  }
+
+  _createClass(InsightCard, [{
+    key: "render",
+    value: function render() {
+      var tutorialSteps = [{
+        label: "You've spent $".concat(Math.round(this.props.transpoSpend * 100) / 100, " on Travel."),
+        imgPath: 'https://images.unsplash.com/photo-1537944434965-cf4679d1a598?auto=format&fit=crop&w=400&h=250&q=60'
+      }, {
+        label: "You've spent a total of $".concat(Math.round(this.props.merchantSpend.amount * 100) / 100, " at ").concat(this.props.merchantSpend.name, "."),
+        imgPath: 'https://images.unsplash.com/photo-1538032746644-0212e812a9e7?auto=format&fit=crop&w=400&h=250&q=60'
+      }, {
+        label: "Your largest transaction was for $".concat(Math.round(this.props.largest.amount * 100) / 100, " at ").concat(this.props.largest.merchant, "."),
+        imgPath: 'https://images.unsplash.com/photo-1518732714860-b62714ce0c59?auto=format&fit=crop&w=400&h=250&q=60'
+      }, {
+        label: "You've spent $".concat(Math.round(this.props.restaurantSpend * 100) / 100, " at Restaurants and Bars."),
+        imgPath: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&h=250&q=80'
+      }, {
+        label: "You have paid $".concat(Math.round(this.props.fees * 100) / 100, " in banking and ATM fees."),
+        imgPath: 'https://images.unsplash.com/photo-1512341689857-198e7e2f3ca8?auto=format&fit=crop&w=400&h=250&q=60'
+      }];
+      return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_cards__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        tutorialSteps: tutorialSteps
+      }));
+    }
+  }]);
+
+  return InsightCard;
+}(react__WEBPACK_IMPORTED_MODULE_1__["Component"]);
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    transactions: state.accountReducer.transactions,
+    largest: state.insightReducer.largest,
+    restaurantSpend: state.insightReducer.restaurantSpend,
+    merchantSpend: state.insightReducer.merchantSpend,
+    transpoSpend: state.insightReducer.transpoSpend,
+    fees: state.insightReducer.fees
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_0__["connect"])(mapStateToProps)(InsightCard));
+
+/***/ }),
+
+/***/ "./client/components/dashboard/insights/InsightsPage.js":
+/*!**************************************************************!*\
+  !*** ./client/components/dashboard/insights/InsightsPage.js ***!
+  \**************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _InsightCards__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./InsightCards */ "./client/components/dashboard/insights/InsightCards.js");
+/* harmony import */ var _BarGraph__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./BarGraph */ "./client/components/dashboard/insights/BarGraph.js");
+/* harmony import */ var _Footer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../Footer */ "./client/components/Footer.js");
+/* harmony import */ var _Loading__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../Loading */ "./client/components/dashboard/Loading.js");
+/* harmony import */ var _store_insightReducer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../../store/insightReducer */ "./client/store/insightReducer.js");
+/* harmony import */ var _store_accountReducer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../store/accountReducer */ "./client/store/accountReducer.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _LineGraph__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./LineGraph */ "./client/components/dashboard/insights/LineGraph.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+
+
+
+
+
+var InsightsPage =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(InsightsPage, _Component);
+
+  function InsightsPage(props) {
+    var _this;
+
+    _classCallCheck(this, InsightsPage);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(InsightsPage).call(this, props));
+    _this.state = {
+      loading: false
+    };
+    return _this;
+  }
+
+  _createClass(InsightsPage, [{
+    key: "componentDidMount",
+    value: function () {
+      var _componentDidMount = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var accounts;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.props.gettingAccounts();
+
+              case 2:
+                accounts = this.props.accounts;
+                _context.next = 5;
+                return this.props.getThreeMonthsData(accounts);
+
+              case 5:
+                this.setState({
+                  loading: true
+                });
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function componentDidMount() {
+        return _componentDidMount.apply(this, arguments);
+      }
+
+      return componentDidMount;
+    }()
+  }, {
+    key: "render",
+    value: function render() {
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, this.state.loading ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        id: "insights-container"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "insight-graph"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "insights-title"
+      }, "Three Months Total Spending"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_BarGraph__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        threeMonthsData: [this.props.threeMonthsData]
+      })), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "insight-graph"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "insights-title"
+      }, "Three Months Spending by Category"), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_LineGraph__WEBPACK_IMPORTED_MODULE_8__["default"], null))), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Footer__WEBPACK_IMPORTED_MODULE_3__["default"], null)) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: "loading"
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Loading__WEBPACK_IMPORTED_MODULE_4__["default"], null), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h2", {
+        className: "loading"
+      }, "Calculating insights")));
+    }
+  }]);
+
+  return InsightsPage;
+}(react__WEBPACK_IMPORTED_MODULE_0__["Component"]);
+
+var mapState = function mapState(state) {
+  return {
+    accounts: state.accountReducer.accounts,
+    threeMonthsData: state.insightReducer.threeMonthsData,
+    transactions: state.accountReducer.transactions
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    getThreeMonthsData: function getThreeMonthsData(plaidAccountData) {
+      return dispatch(Object(_store_insightReducer__WEBPACK_IMPORTED_MODULE_5__["getThreeMonthsData"])(plaidAccountData));
+    },
+    gettingAccounts: function gettingAccounts() {
+      return dispatch(Object(_store_accountReducer__WEBPACK_IMPORTED_MODULE_6__["gettingAccounts"])());
+    },
+    gettingTransactions: function gettingTransactions(plaidAccountData) {
+      return dispatch(Object(_store_accountReducer__WEBPACK_IMPORTED_MODULE_6__["gettingTransactions"])(plaidAccountData));
+    }
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_7__["connect"])(mapState, mapDispatchToProps)(InsightsPage));
+
+/***/ }),
+
+/***/ "./client/components/dashboard/insights/LineGraph.js":
+/*!***********************************************************!*\
+  !*** ./client/components/dashboard/insights/LineGraph.js ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_chartjs_2__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-chartjs-2 */ "./node_modules/react-chartjs-2/es/index.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./client/components/dashboard/utils.js");
+/* harmony import */ var _store_accountReducer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../store/accountReducer */ "./client/store/accountReducer.js");
+/* harmony import */ var _store_insightReducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../store/insightReducer */ "./client/store/insightReducer.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+
+
+
+
+
+
+var data = {
+  labels: [],
+  datasets: [{
+    data: [0, 0, 0],
+    label: 'Food and Drink',
+    borderColor: '#A8DADC',
+    hoverBorderColor: '#40bcc1',
+    fill: false
+  }, {
+    data: [0, 0, 0],
+    label: 'Shops',
+    borderColor: '#f9bd49',
+    hoverBorderColor: '#dda412',
+    fill: false
+  }, {
+    data: [0, 0, 0],
+    label: 'Travel',
+    borderColor: '#1D3557',
+    hoverBorderColor: '#04142b',
+    fill: false
+  }, {
+    data: [0, 0, 0],
+    label: 'Recreation',
+    borderColor: '#E63946',
+    hoverBorderColor: '#8e3339',
+    fill: false
+  }]
+};
+var options = {
+  legend: {
+    display: true,
+    position: 'bottom',
+    labels: {
+      fontColor: 'black'
+    }
+  },
+  layout: {
+    padding: {
+      left: 30,
+      right: 50,
+      top: 50,
+      bottom: 40
+    },
+    maintainAspectRatio: false,
+    responsive: true
+  }
+};
+
+var LineGraph =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(LineGraph, _React$Component);
+
+  function LineGraph() {
+    var _this;
+
+    _classCallCheck(this, LineGraph);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(LineGraph).call(this));
+    _this.state = {
+      data: data
+    };
+    _this.populateData = _this.populateData.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(LineGraph, [{
+    key: "componentDidMount",
+    value: function () {
+      var _componentDidMount = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee() {
+        var accounts;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return this.props.gettingAccounts();
+
+              case 2:
+                accounts = this.props.accounts;
+                _context.next = 5;
+                return this.props.getThreeMonthsDataCategory(accounts);
+
+              case 5:
+                this.populateData();
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function componentDidMount() {
+        return _componentDidMount.apply(this, arguments);
+      }
+
+      return componentDidMount;
+    }()
+  }, {
+    key: "populateData",
+    value: function populateData() {
+      if (this.props.threeMonthsCategory.length) {
+        var catsArray = ['Food and Drink', 'Shops', 'Travel', 'Recreation'];
+        var lineData = this.props.threeMonthsCategory;
+        lineData.map(function (elem, index) {
+          console.log('elem', elem);
+          var label = Object.keys(elem)[0];
+
+          if (!data.labels.includes(label)) {
+            data.labels.push(label);
+          }
+
+          elem[label].labels.map(function (categories, ind) {
+            var catIndex = catsArray.indexOf(categories);
+            data.datasets[catIndex].data[index] += Math.round(elem[label].spend[ind] * 100) / 100;
+          });
+        });
+        this.setState({
+          data: data
+        });
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return this.props.threeMonthsCategory.length ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_chartjs_2__WEBPACK_IMPORTED_MODULE_1__["Line"], {
+        data: data,
+        options: options,
+        height: 400,
+        width: 450
+      })) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null);
+    }
+  }]);
+
+  return LineGraph;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+var mapState = function mapState(state) {
+  return {
+    accounts: state.accountReducer.accounts,
+    threeMonthsCategory: state.insightReducer.threeMonthsCategory
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {
+    gettingAccounts: function gettingAccounts() {
+      return dispatch(Object(_store_accountReducer__WEBPACK_IMPORTED_MODULE_3__["gettingAccounts"])());
+    },
+    getThreeMonthsDataCategory: function getThreeMonthsDataCategory(plaidAccountData) {
+      return dispatch(Object(_store_insightReducer__WEBPACK_IMPORTED_MODULE_4__["getThreeMonthsDataCategory"])(plaidAccountData));
+    }
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_5__["connect"])(mapState, mapDispatchToProps)(LineGraph));
+
+/***/ }),
+
+/***/ "./client/components/dashboard/insights/cards.js":
+/*!*******************************************************!*\
+  !*** ./client/components/dashboard/insights/cards.js ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
+/* harmony import */ var prop_types__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(prop_types__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _material_ui_core_styles__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @material-ui/core/styles */ "./node_modules/@material-ui/core/esm/styles/index.js");
+/* harmony import */ var _material_ui_core_MobileStepper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @material-ui/core/MobileStepper */ "./node_modules/@material-ui/core/esm/MobileStepper/index.js");
+/* harmony import */ var _material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @material-ui/core/Paper */ "./node_modules/@material-ui/core/esm/Paper/index.js");
+/* harmony import */ var _material_ui_core_Typography__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @material-ui/core/Typography */ "./node_modules/@material-ui/core/esm/Typography/index.js");
+/* harmony import */ var _material_ui_core_Button__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @material-ui/core/Button */ "./node_modules/@material-ui/core/esm/Button/index.js");
+/* harmony import */ var _material_ui_icons_KeyboardArrowLeft__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @material-ui/icons/KeyboardArrowLeft */ "./node_modules/@material-ui/icons/KeyboardArrowLeft.js");
+/* harmony import */ var _material_ui_icons_KeyboardArrowLeft__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(_material_ui_icons_KeyboardArrowLeft__WEBPACK_IMPORTED_MODULE_7__);
+/* harmony import */ var _material_ui_icons_KeyboardArrowRight__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @material-ui/icons/KeyboardArrowRight */ "./node_modules/@material-ui/icons/KeyboardArrowRight.js");
+/* harmony import */ var _material_ui_icons_KeyboardArrowRight__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(_material_ui_icons_KeyboardArrowRight__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var react_swipeable_views__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-swipeable-views */ "./node_modules/react-swipeable-views/lib/index.js");
+/* harmony import */ var react_swipeable_views__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(react_swipeable_views__WEBPACK_IMPORTED_MODULE_9__);
+/* harmony import */ var react_swipeable_views_utils__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-swipeable-views-utils */ "./node_modules/react-swipeable-views-utils/lib/index.js");
+/* harmony import */ var react_swipeable_views_utils__WEBPACK_IMPORTED_MODULE_10___default = /*#__PURE__*/__webpack_require__.n(react_swipeable_views_utils__WEBPACK_IMPORTED_MODULE_10__);
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+
+
+
+
+
+
+
+
+
+
+var AutoPlaySwipeableViews = Object(react_swipeable_views_utils__WEBPACK_IMPORTED_MODULE_10__["autoPlay"])(react_swipeable_views__WEBPACK_IMPORTED_MODULE_9___default.a);
+
+var styles = function styles(theme) {
+  return {
+    root: {
+      marginRight: '25px',
+      marginLeft: '25px',
+      marginBottom: '25px',
+      padding: '25px'
+    },
+    header: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 100,
+      width: 350,
+      flexGrow: 1,
+      paddingLeft: theme.spacing.unit * 4,
+      paddingRight: theme.spacing.unit * 4,
+      backgroundColor: 'rgb(240, 240, 240)'
+    },
+    top: {
+      display: 'flex',
+      alignItems: 'center',
+      height: 45,
+      backgroundColor: 'rgb(240, 240, 240)',
+      paddingLeft: theme.spacing.unit * 4,
+      paddingRight: theme.spacing.unit * 4,
+      justifyContent: 'center'
+    },
+    textCard: {
+      fontSize: '1.5rem',
+      color: 'rgb(92, 92, 92)'
+    },
+    cardHead: {
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
+      color: '#404b5b'
+    },
+    bottom: {
+      backgroundColor: 'rgb(240, 240, 240)',
+      color: 'white'
+    },
+    buttons: {
+      color: 'black',
+      fontWeight: 'bold'
+    }
+  };
+};
+
+var SwipeableTextMobileStepper =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(SwipeableTextMobileStepper, _React$Component);
+
+  function SwipeableTextMobileStepper(props) {
+    var _this;
+
+    _classCallCheck(this, SwipeableTextMobileStepper);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SwipeableTextMobileStepper).call(this, props));
+
+    _defineProperty(_assertThisInitialized(_this), "state", {
+      activeStep: 0
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleNext", function () {
+      _this.setState(function (prevState) {
+        return {
+          activeStep: prevState.activeStep + 1
+        };
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleBack", function () {
+      _this.setState(function (prevState) {
+        return {
+          activeStep: prevState.activeStep - 1
+        };
+      });
+    });
+
+    _defineProperty(_assertThisInitialized(_this), "handleStepChange", function (activeStep) {
+      _this.setState({
+        activeStep: activeStep
+      });
+    });
+
+    return _this;
+  }
+
+  _createClass(SwipeableTextMobileStepper, [{
+    key: "render",
+    value: function render() {
+      var _React$createElement;
+
+      var _this$props = this.props,
+          classes = _this$props.classes,
+          theme = _this$props.theme;
+      var activeStep = this.state.activeStep;
+      var maxSteps = this.props.tutorialSteps.length;
+      return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+        className: classes.root
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        square: true,
+        elevation: 0,
+        className: classes.top
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Typography__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        className: classes.cardHead
+      }, "3 Months at a Glance")), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Paper__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        square: true,
+        elevation: 0,
+        className: classes.header
+      }, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Typography__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        className: classes.textCard
+      }, this.props.tutorialSteps[activeStep].label)), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_MobileStepper__WEBPACK_IMPORTED_MODULE_3__["default"], (_React$createElement = {
+        steps: maxSteps,
+        position: "static",
+        activeStep: activeStep,
+        className: classes.mobileStepper
+      }, _defineProperty(_React$createElement, "className", classes.bottom), _defineProperty(_React$createElement, "nextButton", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Button__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        className: classes.buttons,
+        size: "small",
+        onClick: this.handleNext,
+        disabled: activeStep === maxSteps - 1
+      }, "Next", theme.direction === 'rtl' ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_icons_KeyboardArrowLeft__WEBPACK_IMPORTED_MODULE_7___default.a, null) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_icons_KeyboardArrowRight__WEBPACK_IMPORTED_MODULE_8___default.a, null))), _defineProperty(_React$createElement, "backButton", react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_core_Button__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        className: classes.buttons,
+        size: "small",
+        onClick: this.handleBack,
+        disabled: activeStep === 0
+      }, theme.direction === 'rtl' ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_icons_KeyboardArrowRight__WEBPACK_IMPORTED_MODULE_8___default.a, null) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_material_ui_icons_KeyboardArrowLeft__WEBPACK_IMPORTED_MODULE_7___default.a, null), "Back")), _React$createElement)));
+    }
+  }]);
+
+  return SwipeableTextMobileStepper;
+}(react__WEBPACK_IMPORTED_MODULE_0___default.a.Component);
+
+SwipeableTextMobileStepper.propTypes = {
+  classes: prop_types__WEBPACK_IMPORTED_MODULE_1___default.a.object.isRequired,
+  theme: prop_types__WEBPACK_IMPORTED_MODULE_1___default.a.object.isRequired
+};
+/* harmony default export */ __webpack_exports__["default"] = (Object(_material_ui_core_styles__WEBPACK_IMPORTED_MODULE_2__["withStyles"])(styles, {
+  withTheme: true
+})(SwipeableTextMobileStepper));
+
+/***/ }),
+
+/***/ "./client/components/dashboard/utils.js":
+/*!**********************************************!*\
+  !*** ./client/components/dashboard/utils.js ***!
+  \**********************************************/
+/*! exports provided: getCategorySpend, getLargestTransaction, allCategorySpend, fetchBalanceSummary, balancesCondensed, merchantSpend, largestByMerchant, subscriptionFinder, totalMonthly, condenseTotalMonthly, getMonth, getMonthsSpending, simplifyMonthlyData, finalLineGraphData */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCategorySpend", function() { return getCategorySpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLargestTransaction", function() { return getLargestTransaction; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "allCategorySpend", function() { return allCategorySpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchBalanceSummary", function() { return fetchBalanceSummary; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "balancesCondensed", function() { return balancesCondensed; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "merchantSpend", function() { return merchantSpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "largestByMerchant", function() { return largestByMerchant; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "subscriptionFinder", function() { return subscriptionFinder; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "totalMonthly", function() { return totalMonthly; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "condenseTotalMonthly", function() { return condenseTotalMonthly; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMonth", function() { return getMonth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMonthsSpending", function() { return getMonthsSpending; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "simplifyMonthlyData", function() { return simplifyMonthlyData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "finalLineGraphData", function() { return finalLineGraphData; });
+/* harmony import */ var _store_utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../store/utils */ "./client/store/utils.js");
+ //reformats this.props.transactions to include transactions across accounts in a flat array. NOTE: account name is not included.
+// returns amount spent on a given category ACROSS accounts - takes this.props.transactions and a category string
+
+var getCategorySpend = function getCategorySpend(transactionProps, category) {
+  return transactionProps.filter(function (elem) {
+    return elem.category[0] === category;
+  }).reduce(function (accum, elem) {
+    return accum += elem.amount;
+  }, 0);
+}; // returns the largest transaction in the last 30 days - does not include credit card payments or account transfers
+
+var getLargestTransaction = function getLargestTransaction(transactionProps) {
+  return transactionProps.reduce(function (accum, elem) {
+    if (accum.amount < elem.amount && !elem.category.includes('Payment') && !elem.category.includes('Transfer')) {
+      accum.amount = elem.amount;
+      accum.merchant = elem.name;
+      accum.date = new Date(elem.date);
+    }
+
+    return accum;
+  }, {
+    amount: 0,
+    merchant: ''
+  });
+}; // this returns an object of arrays with spending categories and corresponding ammounts spent
+
+var allCategorySpend = function allCategorySpend(transactions) {
+  var labels = [];
+  var spend = [];
+  transactions.map(function (elem) {
+    if (!labels.includes(elem.category[0]) && !elem.category.includes('Payment') && !elem.category.includes('Transfer')) {
+      labels.push(elem.category[0]);
+      spend.push(getCategorySpend(transactions, elem.category[0]));
+    }
+  });
+  return {
+    labels: labels,
+    spend: spend
+  };
+}; //this function uses the fetched data from the balances and filters it to show only
+//Checking and Savings accounts only
+
+var fetchBalanceSummary = function fetchBalanceSummary(balances) {
+  return balances.map(function (elem) {
+    elem.balance = elem.balance.filter(function (ele) {
+      return ele.name === 'Plaid Checking' || ele.name === 'Plaid Saving';
+    });
+    return elem;
+  });
+}; //this uses fetchBalanceSummary to condense everything so make sure
+//when we call this function we are sending in the ORIGINAL DATA FROM PLAID
+
+var balancesCondensed = function balancesCondensed(arr) {
+  var newArray = fetchBalanceSummary(arr);
+  var result = [];
+
+  for (var i = 0; i < newArray.length; i++) {
+    var obj = {};
+    obj.accountName = newArray[i].accountName;
+    var balanceArray = newArray[i].balance;
+    obj.Checking = balanceArray[0].balances.available;
+    obj.Savings = balanceArray[1].balances.available;
+    result.push(obj);
+  }
+
+  return result;
+}; //returns an object with merchant name and cumulative total spent at each merchant in last 30 days
+
+var merchantSpend = function merchantSpend(transactionProps) {
+  var newObj = {};
+  transactionProps.map(function (elem) {
+    if (!elem.category.includes('Payment') && !elem.category.includes('Transfer')) {
+      if (newObj[elem.name] === undefined) {
+        newObj[elem.name] = elem.amount;
+      } else {
+        newObj[elem.name] += elem.amount;
+      }
+    }
+  });
+  return newObj;
+}; //returns merchant with highest amount spent in the last 30 days cumulatively
+
+var largestByMerchant = function largestByMerchant(transactionProps) {
+  var newObj = merchantSpend(transactionProps);
+  var largest = {
+    name: '',
+    amount: 0
+  };
+
+  for (var key in newObj) {
+    if (newObj[key] > largest.amount) {
+      largest.name = key;
+      largest.amount = newObj[key];
+    }
+  }
+
+  return largest;
+};
+var subscriptionFinder = function subscriptionFinder(transactions) {
+  var shortList = {};
+
+  for (var i = 0; i < transactions.length; i++) {
+    var current = transactions[i];
+
+    if (!shortList[current.name]) {
+      shortList[current.name] = {
+        num: 1,
+        charge: current.amount,
+        date: current.date.slice(8),
+        accountName: current.accountName
+      };
+    } else {
+      if (shortList[current.name].charge === current.amount && shortList[current.name].date === current.date.slice(8) && shortList[current.name].accountName === current.accountName) {
+        shortList[current.name].num++;
+      }
+    }
+  }
+
+  var finalList = [];
+
+  for (var key in shortList) {
+    if (shortList[key].num === 3) {
+      finalList.push({
+        name: shortList[key].name,
+        amount: shortList[key].amount
+      });
+    }
+  }
+
+  return finalList;
+}; //call simplifiedMonthly first
+
+var dict = {
+  '01': 'January',
+  '02': 'February',
+  '03': 'March',
+  '04': 'April',
+  '05': 'May',
+  '06': 'June',
+  '07': 'July',
+  '08': 'August',
+  '09': 'September',
+  '10': 'October',
+  '11': 'November',
+  '12': 'December'
+};
+var totalMonthly = function totalMonthly(data) {
+  var returned = {};
+
+  for (var i = 0; i < data.length; i++) {
+    var current = data[i];
+    var trans = current.transactions;
+    var filtered = trans.filter(function (elem) {
+      if (elem.category.length === 2) {
+        return elem.category[0] !== 'Payment' && elem.category[1] !== 'Credit Card';
+      } else {
+        return elem;
+      }
+    });
+
+    for (var j = 0; j < filtered.length; j++) {
+      var monthNum = filtered[j].date.slice(5, 7);
+      var month = dict[monthNum];
+
+      if (returned[month]) {
+        returned[month] += filtered[j].amount;
+      } else {
+        returned[month] = filtered[j].amount;
+      }
+    }
+  }
+
+  return returned;
+}; //this will give an object where the labels is an array of months
+//and the total is an array of all the total per month
+//the obj it takes in is the result of calling totalMonthly
+
+var condenseTotalMonthly = function condenseTotalMonthly(obj) {
+  var newObj = {};
+  var labels = Object.keys(obj);
+  var total = Object.values(obj);
+  newObj.labels = labels;
+  newObj.total = total;
+  return newObj;
+}; //counter is basically getting the fullMonth until counter months before
+
+var getMonth = function getMonth(transactions, counter) {
+  var d = new Date();
+  var currentYear = d.getFullYear().toString();
+  var monthNumber = Number(d.getMonth()) - counter;
+  var monthNum = monthNumber.toString();
+
+  if (monthNum.length === 1) {
+    monthNum = '0' + monthNum;
+  } else if (Number(monthNum) < 4) {
+    monthNum = (Number(monthNum) + 12).toString();
+  }
+
+  var fullDate = currentYear + '-' + monthNum;
+  return fullDate;
+}; //this will give -- based on the month that is being passed on fullDate, will return an
+//array of all the transaction objects in that month
+
+var getMonthsSpending = function getMonthsSpending(transactions, counter) {
+  var fullDate = getMonth(transactions, counter);
+  var newTrans = transactions.filter(function (transaction) {
+    return transaction.date.slice(0, 7) === fullDate && !transaction.category.includes('Payment');
+  });
+  return {
+    date: fullDate,
+    trans: newTrans
+  };
+}; //this will push three objects of three different monthly transactions
+
+var simplifyMonthlyData = function simplifyMonthlyData(transactions) {
+  var finalArray = [];
+  var counter = -1;
+
+  while (counter < 2) {
+    var trans = getMonthsSpending(transactions, counter);
+    finalArray.push(trans);
+    counter += 1;
+  }
+
+  return finalArray;
+}; // this is what we want to manipulate for the line graph which will give us an array
+// of three different objects (since we're doing three different months)
+//with their date in it as well
+// NOTE: make sure to pass in transactions returned from simplifyMonthly!
+
+var finalLineGraphData = function finalLineGraphData(transactions) {
+  var arr = simplifyMonthlyData(transactions);
+  return arr.map(function (elem) {
+    var ret = allCategorySpend(elem.trans);
+    var returned = {};
+    returned[elem.date] = ret;
+    return returned;
+  });
+};
+
+/***/ }),
+
+/***/ "./client/components/private-route/PrivateRoute.js":
+/*!*********************************************************!*\
+  !*** ./client/components/private-route/PrivateRoute.js ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/esm/react-router-dom.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _Navbar__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../Navbar */ "./client/components/Navbar.js");
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
+
+
+
+
+
+
+var PrivateRoute = function PrivateRoute(_ref) {
+  var Component = _ref.component,
+      auth = _ref.auth,
+      rest = _objectWithoutProperties(_ref, ["component", "auth"]);
+
+  return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", null, react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_Navbar__WEBPACK_IMPORTED_MODULE_3__["default"], null), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Route"], _extends({}, rest, {
+    render: function render(props) {
+      return auth === true ? react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(Component, props) : react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["Redirect"], {
+        to: "/login"
+      });
+    }
+  })));
+};
+
+var mapStateToProps = function mapStateToProps(state) {
+  return {
+    auth: state.userReducer.isAuthenticated
