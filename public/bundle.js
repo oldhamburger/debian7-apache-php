@@ -4203,3 +4203,994 @@ var PrivateRoute = function PrivateRoute(_ref) {
 var mapStateToProps = function mapStateToProps(state) {
   return {
     auth: state.userReducer.isAuthenticated
+  };
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_2__["connect"])(mapStateToProps)(PrivateRoute));
+
+/***/ }),
+
+/***/ "./client/index.js":
+/*!*************************!*\
+  !*** ./client/index.js ***!
+  \*************************/
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _app__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./app */ "./client/app.js");
+
+
+
+react_dom__WEBPACK_IMPORTED_MODULE_1___default.a.render(react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_app__WEBPACK_IMPORTED_MODULE_2__["default"], null), document.getElementById('app'));
+
+/***/ }),
+
+/***/ "./client/store/accountReducer.js":
+/*!****************************************!*\
+  !*** ./client/store/accountReducer.js ***!
+  \****************************************/
+/*! exports provided: gettingAccounts, addingAccount, deletingAccount, gettingTransactions, gettingBalance, gettingIncome, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "gettingAccounts", function() { return gettingAccounts; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addingAccount", function() { return addingAccount; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deletingAccount", function() { return deletingAccount; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "gettingTransactions", function() { return gettingTransactions; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "gettingBalance", function() { return gettingBalance; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "gettingIncome", function() { return gettingIncome; });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils */ "./client/store/utils.js");
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+ //initial state
+
+var initialState = {
+  accounts: [],
+  transactions: [],
+  balance: [],
+  income: [],
+  monthlyIncome: 1
+};
+ //ACTION TYPES
+
+var ADD_ACCOUNT = 'ADD_ACCOUNT';
+var GET_TRANSACTIONS = 'GET_TRANSACTIONS';
+var DELETE_ACCOUNT = 'DELETE_ACCOUNT';
+var GET_ACCOUNTS = 'GET_ACCOUNTS';
+var GET_BALANCE = 'GET_BALANCE';
+var GET_INCOME = 'GET_INCOME'; //ACTION CREATOR
+
+var addAccount = function addAccount(plaidAccountData) {
+  return {
+    type: ADD_ACCOUNT,
+    plaidAccountData: plaidAccountData
+  };
+};
+
+var getIncome = function getIncome(income) {
+  return {
+    type: GET_INCOME,
+    income: income
+  };
+};
+
+var getAccounts = function getAccounts(plaidAccountData) {
+  return {
+    type: GET_ACCOUNTS,
+    plaidAccountData: plaidAccountData
+  };
+};
+
+var deleteAccount = function deleteAccount(accountId) {
+  return {
+    type: DELETE_ACCOUNT,
+    accountId: accountId
+  };
+};
+
+var getTransactions = function getTransactions(plaidAccountData) {
+  return {
+    type: GET_TRANSACTIONS,
+    plaidAccountData: plaidAccountData
+  };
+};
+
+var getBalance = function getBalance(plaidAccountData) {
+  return {
+    type: GET_BALANCE,
+    plaidAccountData: plaidAccountData
+  };
+}; //Thunk
+
+
+var gettingAccounts = function gettingAccounts() {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(dispatch) {
+        var _ref2, data;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get('/api/plaid/accounts');
+
+              case 3:
+                _ref2 = _context.sent;
+                data = _ref2.data;
+                dispatch(getAccounts(data));
+                _context.next = 11;
+                break;
+
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](0);
+                console.error(_context.t0);
+
+              case 11:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 8]]);
+      }));
+
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }()
+  );
+};
+var addingAccount = function addingAccount(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(dispatch) {
+        var _ref4, data;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/plaid/accounts/add', plaidAccountData);
+
+              case 3:
+                _ref4 = _context2.sent;
+                data = _ref4.data;
+                dispatch(addAccount(data));
+                _context2.next = 11;
+                break;
+
+              case 8:
+                _context2.prev = 8;
+                _context2.t0 = _context2["catch"](0);
+                console.error(_context2.t0);
+
+              case 11:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 8]]);
+      }));
+
+      return function (_x2) {
+        return _ref3.apply(this, arguments);
+      };
+    }()
+  );
+};
+var deletingAccount = function deletingAccount(accountId) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref5 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee3(dispatch) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                _context3.prev = 0;
+                _context3.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a["delete"]("/api/plaid/accounts/".concat(accountId));
+
+              case 3:
+                dispatch(deleteAccount(accountId));
+                _context3.next = 9;
+                break;
+
+              case 6:
+                _context3.prev = 6;
+                _context3.t0 = _context3["catch"](0);
+                console.error(_context3.t0);
+
+              case 9:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, null, [[0, 6]]);
+      }));
+
+      return function (_x3) {
+        return _ref5.apply(this, arguments);
+      };
+    }()
+  );
+};
+var gettingTransactions = function gettingTransactions(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref6 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee4(dispatch) {
+        var _ref7, data;
+
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                _context4.prev = 0;
+                _context4.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/plaid/accounts/transactions/monthly', plaidAccountData);
+
+              case 3:
+                _ref7 = _context4.sent;
+                data = _ref7.data;
+                console.log('data transactions', data);
+                dispatch(getTransactions(data));
+                _context4.next = 12;
+                break;
+
+              case 9:
+                _context4.prev = 9;
+                _context4.t0 = _context4["catch"](0);
+                console.error(_context4.t0);
+
+              case 12:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, null, [[0, 9]]);
+      }));
+
+      return function (_x4) {
+        return _ref6.apply(this, arguments);
+      };
+    }()
+  );
+};
+var gettingBalance = function gettingBalance(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref8 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee5(dispatch) {
+        var _ref9, data;
+
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                _context5.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/plaid/accounts/balance', plaidAccountData);
+
+              case 3:
+                _ref9 = _context5.sent;
+                data = _ref9.data;
+                dispatch(getBalance(data));
+                _context5.next = 11;
+                break;
+
+              case 8:
+                _context5.prev = 8;
+                _context5.t0 = _context5["catch"](0);
+                console.error(_context5.t0);
+
+              case 11:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 8]]);
+      }));
+
+      return function (_x5) {
+        return _ref8.apply(this, arguments);
+      };
+    }()
+  );
+};
+var gettingIncome = function gettingIncome(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref10 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee6(dispatch) {
+        var _ref11, data;
+
+        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                _context6.prev = 0;
+                _context6.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/plaid/income', plaidAccountData);
+
+              case 3:
+                _ref11 = _context6.sent;
+                data = _ref11.data;
+                console.log('data', data);
+                dispatch(getIncome(data));
+                _context6.next = 12;
+                break;
+
+              case 9:
+                _context6.prev = 9;
+                _context6.t0 = _context6["catch"](0);
+                console.error(_context6.t0);
+
+              case 12:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6, null, [[0, 9]]);
+      }));
+
+      return function (_x6) {
+        return _ref10.apply(this, arguments);
+      };
+    }()
+  );
+}; //REDUCER
+
+/* harmony default export */ __webpack_exports__["default"] = (function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case ADD_ACCOUNT:
+      return _objectSpread({}, state, {
+        accounts: [action.plaidAccountData].concat(_toConsumableArray(state.accounts))
+      });
+
+    case DELETE_ACCOUNT:
+      return _objectSpread({}, state, {
+        accounts: _toConsumableArray(state.accounts.filter(function (account) {
+          return account.accountId !== action.accountId;
+        }))
+      });
+
+    case GET_TRANSACTIONS:
+      var simplified = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["simplifyMonthly"])(_toConsumableArray(action.plaidAccountData));
+      return _objectSpread({}, state, {
+        transactions: simplified
+      });
+
+    case GET_ACCOUNTS:
+      return _objectSpread({}, state, {
+        accounts: _toConsumableArray(action.plaidAccountData)
+      });
+
+    case GET_BALANCE:
+      return _objectSpread({}, state, {
+        balance: _toConsumableArray(action.plaidAccountData)
+      });
+
+    case GET_INCOME:
+      var monthlyIncome = Object(_utils__WEBPACK_IMPORTED_MODULE_1__["getIncomeTotal"])(_toConsumableArray(action.income));
+      return _objectSpread({}, state, {
+        income: _toConsumableArray(action.income),
+        monthlyIncome: monthlyIncome
+      });
+
+    default:
+      return state;
+  }
+});
+
+/***/ }),
+
+/***/ "./client/store/budgetReducer.js":
+/*!***************************************!*\
+  !*** ./client/store/budgetReducer.js ***!
+  \***************************************/
+/*! exports provided: addingBudget, gettingBudget, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addingBudget", function() { return addingBudget; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "gettingBudget", function() { return gettingBudget; });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+var initialState = {
+  budget: 0,
+  spendingLimit: 0
+};
+var ADD_BUDGET = 'ADD_BUDGET';
+var GET_BUDGET = 'GET_BUDGET';
+
+var addBudget = function addBudget(budgetData, monthlyIncome) {
+  return {
+    type: ADD_BUDGET,
+    budgetData: budgetData,
+    monthlyIncome: monthlyIncome
+  };
+};
+
+var getBudget = function getBudget(budget, monthlyIncome) {
+  return {
+    type: GET_BUDGET,
+    budget: budget,
+    monthlyIncome: monthlyIncome
+  };
+};
+
+var addingBudget = function addingBudget(budgetData, monthlyIncome) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(dispatch) {
+        var _ref2, data;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/budget', budgetData);
+
+              case 3:
+                _ref2 = _context.sent;
+                data = _ref2.data;
+                dispatch(addBudget(data, monthlyIncome));
+                _context.next = 11;
+                break;
+
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](0);
+                console.error(_context.t0);
+
+              case 11:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 8]]);
+      }));
+
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }()
+  );
+};
+var gettingBudget = function gettingBudget(userId, monthlyIncome) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(dispatch) {
+        var _ref4, data;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.get("/api/budget/".concat(userId));
+
+              case 3:
+                _ref4 = _context2.sent;
+                data = _ref4.data;
+                dispatch(getBudget(data.monthlyGoal, monthlyIncome));
+                _context2.next = 11;
+                break;
+
+              case 8:
+                _context2.prev = 8;
+                _context2.t0 = _context2["catch"](0);
+                console.error(_context2.t0);
+
+              case 11:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 8]]);
+      }));
+
+      return function (_x2) {
+        return _ref3.apply(this, arguments);
+      };
+    }()
+  );
+};
+/* harmony default export */ __webpack_exports__["default"] = (function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case ADD_BUDGET:
+      return _objectSpread({}, state, {
+        budget: action.budgetData,
+        spendingLimit: Math.round((Number(action.monthlyIncome) - Number(action.budgetData)) * 100) / 100
+      });
+
+    case GET_BUDGET:
+      return _objectSpread({}, state, {
+        budget: action.budget,
+        spendingLimit: Math.round((Number(action.monthlyIncome) - Number(action.budget)) * 100) / 100
+      });
+
+    default:
+      return state;
+  }
+});
+
+/***/ }),
+
+/***/ "./client/store/index.js":
+/*!*******************************!*\
+  !*** ./client/store/index.js ***!
+  \*******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var redux__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! redux */ "./node_modules/redux/es/redux.js");
+/* harmony import */ var redux_logger__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! redux-logger */ "./node_modules/redux-logger/dist/redux-logger.js");
+/* harmony import */ var redux_logger__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(redux_logger__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var redux_thunk__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! redux-thunk */ "./node_modules/redux-thunk/es/index.js");
+/* harmony import */ var redux_devtools_extension__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! redux-devtools-extension */ "./node_modules/redux-devtools-extension/index.js");
+/* harmony import */ var redux_devtools_extension__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(redux_devtools_extension__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _userReducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./userReducer */ "./client/store/userReducer.js");
+/* harmony import */ var _accountReducer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./accountReducer */ "./client/store/accountReducer.js");
+/* harmony import */ var _insightReducer__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./insightReducer */ "./client/store/insightReducer.js");
+/* harmony import */ var _budgetReducer__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./budgetReducer */ "./client/store/budgetReducer.js");
+
+
+
+
+
+
+
+
+var reducer = Object(redux__WEBPACK_IMPORTED_MODULE_0__["combineReducers"])({
+  userReducer: _userReducer__WEBPACK_IMPORTED_MODULE_4__["default"],
+  accountReducer: _accountReducer__WEBPACK_IMPORTED_MODULE_5__["default"],
+  insightReducer: _insightReducer__WEBPACK_IMPORTED_MODULE_6__["default"],
+  budgetReducer: _budgetReducer__WEBPACK_IMPORTED_MODULE_7__["default"]
+});
+var middleware = Object(redux_devtools_extension__WEBPACK_IMPORTED_MODULE_3__["composeWithDevTools"])(Object(redux__WEBPACK_IMPORTED_MODULE_0__["applyMiddleware"])(redux_thunk__WEBPACK_IMPORTED_MODULE_2__["default"], Object(redux_logger__WEBPACK_IMPORTED_MODULE_1__["createLogger"])({
+  collapsed: true
+})));
+var store = Object(redux__WEBPACK_IMPORTED_MODULE_0__["createStore"])(reducer, middleware);
+/* harmony default export */ __webpack_exports__["default"] = (store);
+
+/***/ }),
+
+/***/ "./client/store/insightReducer.js":
+/*!****************************************!*\
+  !*** ./client/store/insightReducer.js ***!
+  \****************************************/
+/*! exports provided: getLargest, getRestaurantSpend, getTranspoSpend, getMerchantSpend, getFees, getThreeMonths, getThreeMonthsCategory, getThreeMonthsData, getThreeMonthsDataCategory, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLargest", function() { return getLargest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRestaurantSpend", function() { return getRestaurantSpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getTranspoSpend", function() { return getTranspoSpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getMerchantSpend", function() { return getMerchantSpend; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getFees", function() { return getFees; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getThreeMonths", function() { return getThreeMonths; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getThreeMonthsCategory", function() { return getThreeMonthsCategory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getThreeMonthsData", function() { return getThreeMonthsData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getThreeMonthsDataCategory", function() { return getThreeMonthsDataCategory; });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/dashboard/utils */ "./client/components/dashboard/utils.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ "./client/store/utils.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+/* eslint-disable no-case-declarations */
+
+
+
+var GET_LARGEST = 'GET_LARGEST';
+var GET_RESTAURANT = 'GET_RESTAURANT';
+var GET_MERCHANT = 'GET_MERCHANT';
+var GET_TRANSPO = 'GET_TRANSPO';
+var GET_FEES = 'GET_FEES';
+var GET_THREE_MONTHS = 'GET_THREE_MONTHS ';
+var GET_THREE_MONTHS_CATEGORY = 'GET_THREE_MONTHS_CATEGORY ';
+var getLargest = function getLargest(props) {
+  return {
+    type: GET_LARGEST,
+    props: props
+  };
+};
+var getRestaurantSpend = function getRestaurantSpend(props) {
+  return {
+    type: GET_RESTAURANT,
+    props: props
+  };
+};
+var getTranspoSpend = function getTranspoSpend(props) {
+  return {
+    type: GET_TRANSPO,
+    props: props
+  };
+};
+var getMerchantSpend = function getMerchantSpend(props) {
+  return {
+    type: GET_MERCHANT,
+    props: props
+  };
+};
+var getFees = function getFees(props) {
+  return {
+    type: GET_FEES,
+    props: props
+  };
+};
+var getThreeMonths = function getThreeMonths(threeMonthsData) {
+  return {
+    type: GET_THREE_MONTHS,
+    threeMonthsData: threeMonthsData
+  };
+};
+var getThreeMonthsCategory = function getThreeMonthsCategory(threeMonthsData) {
+  return {
+    type: GET_THREE_MONTHS_CATEGORY,
+    threeMonthsData: threeMonthsData
+  };
+};
+var initialState = {
+  largest: {},
+  merchantSpend: {},
+  restaurantSpend: '',
+  transpoSpend: '',
+  fees: 0,
+  threeMonthsData: {},
+  threeMonthsCategory: {}
+};
+var getThreeMonthsData = function getThreeMonthsData(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(dispatch) {
+        var _ref2, data;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('api/plaid/accounts/transactions/monthly', plaidAccountData);
+
+              case 3:
+                _ref2 = _context.sent;
+                data = _ref2.data;
+                dispatch(getThreeMonths(data));
+                _context.next = 11;
+                break;
+
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](0);
+                console.error(_context.t0);
+
+              case 11:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 8]]);
+      }));
+
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }()
+  );
+};
+var getThreeMonthsDataCategory = function getThreeMonthsDataCategory(plaidAccountData) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(dispatch) {
+        var _ref4, data;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('api/plaid/accounts/transactions/monthly', plaidAccountData);
+
+              case 3:
+                _ref4 = _context2.sent;
+                data = _ref4.data;
+                console.log('dispatched', data);
+                dispatch(getThreeMonthsCategory(data));
+                _context2.next = 12;
+                break;
+
+              case 9:
+                _context2.prev = 9;
+                _context2.t0 = _context2["catch"](0);
+                console.error(_context2.t0);
+
+              case 12:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, null, [[0, 9]]);
+      }));
+
+      return function (_x2) {
+        return _ref3.apply(this, arguments);
+      };
+    }()
+  );
+};
+/* harmony default export */ __webpack_exports__["default"] = (function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case GET_LARGEST:
+      var largest = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["getLargestTransaction"])(action.props);
+      return _objectSpread({}, state, {
+        largest: largest
+      });
+
+    case GET_RESTAURANT:
+      var rest = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["getCategorySpend"])(action.props, 'Food and Drink');
+      return _objectSpread({}, state, {
+        restaurantSpend: rest
+      });
+
+    case GET_FEES:
+      var fees = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["getCategorySpend"])(action.props, 'Fees');
+      return _objectSpread({}, state, {
+        fees: fees
+      });
+
+    case GET_MERCHANT:
+      var merchant = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["largestByMerchant"])(action.props);
+      return _objectSpread({}, state, {
+        merchantSpend: merchant
+      });
+
+    case GET_TRANSPO:
+      var transpo = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["getCategorySpend"])(action.props, 'Travel');
+      return _objectSpread({}, state, {
+        transpoSpend: transpo
+      });
+
+    case GET_THREE_MONTHS:
+      var threeMonthsData = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["totalMonthly"])(action.threeMonthsData);
+      return _objectSpread({}, state, {
+        threeMonthsData: threeMonthsData
+      });
+
+    case GET_THREE_MONTHS_CATEGORY:
+      var threeMonthsCategory = Object(_components_dashboard_utils__WEBPACK_IMPORTED_MODULE_1__["finalLineGraphData"])(Object(_utils__WEBPACK_IMPORTED_MODULE_2__["simplifyMonthly"])(action.threeMonthsData));
+      return _objectSpread({}, state, {
+        threeMonthsCategory: threeMonthsCategory
+      });
+
+    default:
+      return state;
+  }
+});
+
+/***/ }),
+
+/***/ "./client/store/userReducer.js":
+/*!*************************************!*\
+  !*** ./client/store/userReducer.js ***!
+  \*************************************/
+/*! exports provided: GET_ERRORS, createUser, fetchUser, getErrors, createdUser, loggedInUser, logoutUser, default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "GET_ERRORS", function() { return GET_ERRORS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createUser", function() { return createUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fetchUser", function() { return fetchUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getErrors", function() { return getErrors; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createdUser", function() { return createdUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "loggedInUser", function() { return loggedInUser; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "logoutUser", function() { return logoutUser; });
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_setAuthToken__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/setAuthToken */ "./client/utils/setAuthToken.js");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+
+
+var jwtDecode = __webpack_require__(/*! jwt-decode */ "./node_modules/jwt-decode/lib/index.js");
+
+ //initialState
+
+var initialState = {
+  isAuthenticated: false,
+  user: {},
+  errors: {}
+};
+
+var isEmpty = __webpack_require__(/*! is-empty */ "./node_modules/is-empty/lib/index.js"); //ACTION TYPES
+
+
+var CREATE_USER = 'CREATE_USER'; // for user registration
+
+var GET_CURRENT_USER = 'GET_CURRENT_USER'; // for getting current user from login
+
+var GET_ERRORS = 'GET_ERRORS'; //ACTION CRETORS
+
+var createUser = function createUser(user) {
+  return {
+    type: CREATE_USER,
+    user: user
+  };
+};
+var fetchUser = function fetchUser(user) {
+  return {
+    type: GET_CURRENT_USER,
+    user: user
+  };
+};
+var getErrors = function getErrors(err) {
+  return {
+    type: GET_ERRORS,
+    err: err
+  };
+}; //Thunk - for user registration
+
+var createdUser = function createdUser(user) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(dispatch) {
+        var _ref2, data;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/users/register', user);
+
+              case 3:
+                _ref2 = _context.sent;
+                data = _ref2.data;
+                dispatch(createUser(data));
+                dispatch(getErrors('No errors'));
+                _context.next = 12;
+                break;
+
+              case 9:
+                _context.prev = 9;
+                _context.t0 = _context["catch"](0);
+                dispatch(getErrors(_context.t0.response.data));
+
+              case 12:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[0, 9]]);
+      }));
+
+      return function (_x) {
+        return _ref.apply(this, arguments);
+      };
+    }()
+  );
+}; //Thunk - for user login
+
+var loggedInUser = function loggedInUser(user) {
+  return (
+    /*#__PURE__*/
+    function () {
+      var _ref3 = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee2(dispatch) {
+        var res, token, data;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                _context2.next = 3;
+                return axios__WEBPACK_IMPORTED_MODULE_0___default.a.post('/api/users/login', user);
+
+              case 3:
+                res = _context2.sent;
+                token = res.data.token;
+                localStorage.setItem('jwt', token);
+                Object(_utils_setAuthToken__WEBPACK_IMPORTED_MODULE_1__["default"])(token);
+                data = jwtDecode(token);
+                dispatch(fetchUser(data));
