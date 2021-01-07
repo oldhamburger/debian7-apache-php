@@ -49554,3 +49554,993 @@ core_defaults._set('global', {
 			borderJoinStyle: 'miter',
 			capBezierPoints: true,
 			fill: true, // do we fill in the area between the line and its base axis
+		}
+	}
+});
+
+var element_line = core_element.extend({
+	draw: function() {
+		var me = this;
+		var vm = me._view;
+		var ctx = me._chart.ctx;
+		var spanGaps = vm.spanGaps;
+		var points = me._children.slice(); // clone array
+		var globalDefaults = core_defaults.global;
+		var globalOptionLineElements = globalDefaults.elements.line;
+		var lastDrawnIndex = -1;
+		var index, current, previous, currentVM;
+
+		// If we are looping, adding the first point again
+		if (me._loop && points.length) {
+			points.push(points[0]);
+		}
+
+		ctx.save();
+
+		// Stroke Line Options
+		ctx.lineCap = vm.borderCapStyle || globalOptionLineElements.borderCapStyle;
+
+		// IE 9 and 10 do not support line dash
+		if (ctx.setLineDash) {
+			ctx.setLineDash(vm.borderDash || globalOptionLineElements.borderDash);
+		}
+
+		ctx.lineDashOffset = valueOrDefault$1(vm.borderDashOffset, globalOptionLineElements.borderDashOffset);
+		ctx.lineJoin = vm.borderJoinStyle || globalOptionLineElements.borderJoinStyle;
+		ctx.lineWidth = valueOrDefault$1(vm.borderWidth, globalOptionLineElements.borderWidth);
+		ctx.strokeStyle = vm.borderColor || globalDefaults.defaultColor;
+
+		// Stroke Line
+		ctx.beginPath();
+		lastDrawnIndex = -1;
+
+		for (index = 0; index < points.length; ++index) {
+			current = points[index];
+			previous = helpers$1.previousItem(points, index);
+			currentVM = current._view;
+
+			// First point moves to it's starting position no matter what
+			if (index === 0) {
+				if (!currentVM.skip) {
+					ctx.moveTo(currentVM.x, currentVM.y);
+					lastDrawnIndex = index;
+				}
+			} else {
+				previous = lastDrawnIndex === -1 ? previous : points[lastDrawnIndex];
+
+				if (!currentVM.skip) {
+					if ((lastDrawnIndex !== (index - 1) && !spanGaps) || lastDrawnIndex === -1) {
+						// There was a gap and this is the first point after the gap
+						ctx.moveTo(currentVM.x, currentVM.y);
+					} else {
+						// Line to next point
+						helpers$1.canvas.lineTo(ctx, previous._view, current._view);
+					}
+					lastDrawnIndex = index;
+				}
+			}
+		}
+
+		ctx.stroke();
+		ctx.restore();
+	}
+});
+
+var valueOrDefault$2 = helpers$1.valueOrDefault;
+
+var defaultColor$1 = core_defaults.global.defaultColor;
+
+core_defaults._set('global', {
+	elements: {
+		point: {
+			radius: 3,
+			pointStyle: 'circle',
+			backgroundColor: defaultColor$1,
+			borderColor: defaultColor$1,
+			borderWidth: 1,
+			// Hover
+			hitRadius: 1,
+			hoverRadius: 4,
+			hoverBorderWidth: 1
+		}
+	}
+});
+
+function xRange(mouseX) {
+	var vm = this._view;
+	return vm ? (Math.abs(mouseX - vm.x) < vm.radius + vm.hitRadius) : false;
+}
+
+function yRange(mouseY) {
+	var vm = this._view;
+	return vm ? (Math.abs(mouseY - vm.y) < vm.radius + vm.hitRadius) : false;
+}
+
+var element_point = core_element.extend({
+	inRange: function(mouseX, mouseY) {
+		var vm = this._view;
+		return vm ? ((Math.pow(mouseX - vm.x, 2) + Math.pow(mouseY - vm.y, 2)) < Math.pow(vm.hitRadius + vm.radius, 2)) : false;
+	},
+
+	inLabelRange: xRange,
+	inXRange: xRange,
+	inYRange: yRange,
+
+	getCenterPoint: function() {
+		var vm = this._view;
+		return {
+			x: vm.x,
+			y: vm.y
+		};
+	},
+
+	getArea: function() {
+		return Math.PI * Math.pow(this._view.radius, 2);
+	},
+
+	tooltipPosition: function() {
+		var vm = this._view;
+		return {
+			x: vm.x,
+			y: vm.y,
+			padding: vm.radius + vm.borderWidth
+		};
+	},
+
+	draw: function(chartArea) {
+		var vm = this._view;
+		var ctx = this._chart.ctx;
+		var pointStyle = vm.pointStyle;
+		var rotation = vm.rotation;
+		var radius = vm.radius;
+		var x = vm.x;
+		var y = vm.y;
+		var globalDefaults = core_defaults.global;
+		var defaultColor = globalDefaults.defaultColor; // eslint-disable-line no-shadow
+
+		if (vm.skip) {
+			return;
+		}
+
+		// Clipping for Points.
+		if (chartArea === undefined || helpers$1.canvas._isPointInArea(vm, chartArea)) {
+			ctx.strokeStyle = vm.borderColor || defaultColor;
+			ctx.lineWidth = valueOrDefault$2(vm.borderWidth, globalDefaults.elements.point.borderWidth);
+			ctx.fillStyle = vm.backgroundColor || defaultColor;
+			helpers$1.canvas.drawPoint(ctx, pointStyle, radius, x, y, rotation);
+		}
+	}
+});
+
+var defaultColor$2 = core_defaults.global.defaultColor;
+
+core_defaults._set('global', {
+	elements: {
+		rectangle: {
+			backgroundColor: defaultColor$2,
+			borderColor: defaultColor$2,
+			borderSkipped: 'bottom',
+			borderWidth: 0
+		}
+	}
+});
+
+function isVertical(vm) {
+	return vm && vm.width !== undefined;
+}
+
+/**
+ * Helper function to get the bounds of the bar regardless of the orientation
+ * @param bar {Chart.Element.Rectangle} the bar
+ * @return {Bounds} bounds of the bar
+ * @private
+ */
+function getBarBounds(vm) {
+	var x1, x2, y1, y2, half;
+
+	if (isVertical(vm)) {
+		half = vm.width / 2;
+		x1 = vm.x - half;
+		x2 = vm.x + half;
+		y1 = Math.min(vm.y, vm.base);
+		y2 = Math.max(vm.y, vm.base);
+	} else {
+		half = vm.height / 2;
+		x1 = Math.min(vm.x, vm.base);
+		x2 = Math.max(vm.x, vm.base);
+		y1 = vm.y - half;
+		y2 = vm.y + half;
+	}
+
+	return {
+		left: x1,
+		top: y1,
+		right: x2,
+		bottom: y2
+	};
+}
+
+function swap(orig, v1, v2) {
+	return orig === v1 ? v2 : orig === v2 ? v1 : orig;
+}
+
+function parseBorderSkipped(vm) {
+	var edge = vm.borderSkipped;
+	var res = {};
+
+	if (!edge) {
+		return res;
+	}
+
+	if (vm.horizontal) {
+		if (vm.base > vm.x) {
+			edge = swap(edge, 'left', 'right');
+		}
+	} else if (vm.base < vm.y) {
+		edge = swap(edge, 'bottom', 'top');
+	}
+
+	res[edge] = true;
+	return res;
+}
+
+function parseBorderWidth(vm, maxW, maxH) {
+	var value = vm.borderWidth;
+	var skip = parseBorderSkipped(vm);
+	var t, r, b, l;
+
+	if (helpers$1.isObject(value)) {
+		t = +value.top || 0;
+		r = +value.right || 0;
+		b = +value.bottom || 0;
+		l = +value.left || 0;
+	} else {
+		t = r = b = l = +value || 0;
+	}
+
+	return {
+		t: skip.top || (t < 0) ? 0 : t > maxH ? maxH : t,
+		r: skip.right || (r < 0) ? 0 : r > maxW ? maxW : r,
+		b: skip.bottom || (b < 0) ? 0 : b > maxH ? maxH : b,
+		l: skip.left || (l < 0) ? 0 : l > maxW ? maxW : l
+	};
+}
+
+function boundingRects(vm) {
+	var bounds = getBarBounds(vm);
+	var width = bounds.right - bounds.left;
+	var height = bounds.bottom - bounds.top;
+	var border = parseBorderWidth(vm, width / 2, height / 2);
+
+	return {
+		outer: {
+			x: bounds.left,
+			y: bounds.top,
+			w: width,
+			h: height
+		},
+		inner: {
+			x: bounds.left + border.l,
+			y: bounds.top + border.t,
+			w: width - border.l - border.r,
+			h: height - border.t - border.b
+		}
+	};
+}
+
+function inRange(vm, x, y) {
+	var skipX = x === null;
+	var skipY = y === null;
+	var bounds = !vm || (skipX && skipY) ? false : getBarBounds(vm);
+
+	return bounds
+		&& (skipX || x >= bounds.left && x <= bounds.right)
+		&& (skipY || y >= bounds.top && y <= bounds.bottom);
+}
+
+var element_rectangle = core_element.extend({
+	draw: function() {
+		var ctx = this._chart.ctx;
+		var vm = this._view;
+		var rects = boundingRects(vm);
+		var outer = rects.outer;
+		var inner = rects.inner;
+
+		ctx.fillStyle = vm.backgroundColor;
+		ctx.fillRect(outer.x, outer.y, outer.w, outer.h);
+
+		if (outer.w === inner.w && outer.h === inner.h) {
+			return;
+		}
+
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(outer.x, outer.y, outer.w, outer.h);
+		ctx.clip();
+		ctx.fillStyle = vm.borderColor;
+		ctx.rect(inner.x, inner.y, inner.w, inner.h);
+		ctx.fill('evenodd');
+		ctx.restore();
+	},
+
+	height: function() {
+		var vm = this._view;
+		return vm.base - vm.y;
+	},
+
+	inRange: function(mouseX, mouseY) {
+		return inRange(this._view, mouseX, mouseY);
+	},
+
+	inLabelRange: function(mouseX, mouseY) {
+		var vm = this._view;
+		return isVertical(vm)
+			? inRange(vm, mouseX, null)
+			: inRange(vm, null, mouseY);
+	},
+
+	inXRange: function(mouseX) {
+		return inRange(this._view, mouseX, null);
+	},
+
+	inYRange: function(mouseY) {
+		return inRange(this._view, null, mouseY);
+	},
+
+	getCenterPoint: function() {
+		var vm = this._view;
+		var x, y;
+		if (isVertical(vm)) {
+			x = vm.x;
+			y = (vm.y + vm.base) / 2;
+		} else {
+			x = (vm.x + vm.base) / 2;
+			y = vm.y;
+		}
+
+		return {x: x, y: y};
+	},
+
+	getArea: function() {
+		var vm = this._view;
+
+		return isVertical(vm)
+			? vm.width * Math.abs(vm.y - vm.base)
+			: vm.height * Math.abs(vm.x - vm.base);
+	},
+
+	tooltipPosition: function() {
+		var vm = this._view;
+		return {
+			x: vm.x,
+			y: vm.y
+		};
+	}
+});
+
+var elements = {};
+var Arc = element_arc;
+var Line = element_line;
+var Point = element_point;
+var Rectangle = element_rectangle;
+elements.Arc = Arc;
+elements.Line = Line;
+elements.Point = Point;
+elements.Rectangle = Rectangle;
+
+var resolve$1 = helpers$1.options.resolve;
+
+core_defaults._set('bar', {
+	hover: {
+		mode: 'label'
+	},
+
+	scales: {
+		xAxes: [{
+			type: 'category',
+			categoryPercentage: 0.8,
+			barPercentage: 0.9,
+			offset: true,
+			gridLines: {
+				offsetGridLines: true
+			}
+		}],
+
+		yAxes: [{
+			type: 'linear'
+		}]
+	}
+});
+
+/**
+ * Computes the "optimal" sample size to maintain bars equally sized while preventing overlap.
+ * @private
+ */
+function computeMinSampleSize(scale, pixels) {
+	var min = scale.isHorizontal() ? scale.width : scale.height;
+	var ticks = scale.getTicks();
+	var prev, curr, i, ilen;
+
+	for (i = 1, ilen = pixels.length; i < ilen; ++i) {
+		min = Math.min(min, Math.abs(pixels[i] - pixels[i - 1]));
+	}
+
+	for (i = 0, ilen = ticks.length; i < ilen; ++i) {
+		curr = scale.getPixelForTick(i);
+		min = i > 0 ? Math.min(min, curr - prev) : min;
+		prev = curr;
+	}
+
+	return min;
+}
+
+/**
+ * Computes an "ideal" category based on the absolute bar thickness or, if undefined or null,
+ * uses the smallest interval (see computeMinSampleSize) that prevents bar overlapping. This
+ * mode currently always generates bars equally sized (until we introduce scriptable options?).
+ * @private
+ */
+function computeFitCategoryTraits(index, ruler, options) {
+	var thickness = options.barThickness;
+	var count = ruler.stackCount;
+	var curr = ruler.pixels[index];
+	var size, ratio;
+
+	if (helpers$1.isNullOrUndef(thickness)) {
+		size = ruler.min * options.categoryPercentage;
+		ratio = options.barPercentage;
+	} else {
+		// When bar thickness is enforced, category and bar percentages are ignored.
+		// Note(SB): we could add support for relative bar thickness (e.g. barThickness: '50%')
+		// and deprecate barPercentage since this value is ignored when thickness is absolute.
+		size = thickness * count;
+		ratio = 1;
+	}
+
+	return {
+		chunk: size / count,
+		ratio: ratio,
+		start: curr - (size / 2)
+	};
+}
+
+/**
+ * Computes an "optimal" category that globally arranges bars side by side (no gap when
+ * percentage options are 1), based on the previous and following categories. This mode
+ * generates bars with different widths when data are not evenly spaced.
+ * @private
+ */
+function computeFlexCategoryTraits(index, ruler, options) {
+	var pixels = ruler.pixels;
+	var curr = pixels[index];
+	var prev = index > 0 ? pixels[index - 1] : null;
+	var next = index < pixels.length - 1 ? pixels[index + 1] : null;
+	var percent = options.categoryPercentage;
+	var start, size;
+
+	if (prev === null) {
+		// first data: its size is double based on the next point or,
+		// if it's also the last data, we use the scale size.
+		prev = curr - (next === null ? ruler.end - ruler.start : next - curr);
+	}
+
+	if (next === null) {
+		// last data: its size is also double based on the previous point.
+		next = curr + curr - prev;
+	}
+
+	start = curr - (curr - Math.min(prev, next)) / 2 * percent;
+	size = Math.abs(next - prev) / 2 * percent;
+
+	return {
+		chunk: size / ruler.stackCount,
+		ratio: options.barPercentage,
+		start: start
+	};
+}
+
+var controller_bar = core_datasetController.extend({
+
+	dataElementType: elements.Rectangle,
+
+	initialize: function() {
+		var me = this;
+		var meta;
+
+		core_datasetController.prototype.initialize.apply(me, arguments);
+
+		meta = me.getMeta();
+		meta.stack = me.getDataset().stack;
+		meta.bar = true;
+	},
+
+	update: function(reset) {
+		var me = this;
+		var rects = me.getMeta().data;
+		var i, ilen;
+
+		me._ruler = me.getRuler();
+
+		for (i = 0, ilen = rects.length; i < ilen; ++i) {
+			me.updateElement(rects[i], i, reset);
+		}
+	},
+
+	updateElement: function(rectangle, index, reset) {
+		var me = this;
+		var meta = me.getMeta();
+		var dataset = me.getDataset();
+		var options = me._resolveElementOptions(rectangle, index);
+
+		rectangle._xScale = me.getScaleForId(meta.xAxisID);
+		rectangle._yScale = me.getScaleForId(meta.yAxisID);
+		rectangle._datasetIndex = me.index;
+		rectangle._index = index;
+		rectangle._model = {
+			backgroundColor: options.backgroundColor,
+			borderColor: options.borderColor,
+			borderSkipped: options.borderSkipped,
+			borderWidth: options.borderWidth,
+			datasetLabel: dataset.label,
+			label: me.chart.data.labels[index]
+		};
+
+		me._updateElementGeometry(rectangle, index, reset);
+
+		rectangle.pivot();
+	},
+
+	/**
+	 * @private
+	 */
+	_updateElementGeometry: function(rectangle, index, reset) {
+		var me = this;
+		var model = rectangle._model;
+		var vscale = me._getValueScale();
+		var base = vscale.getBasePixel();
+		var horizontal = vscale.isHorizontal();
+		var ruler = me._ruler || me.getRuler();
+		var vpixels = me.calculateBarValuePixels(me.index, index);
+		var ipixels = me.calculateBarIndexPixels(me.index, index, ruler);
+
+		model.horizontal = horizontal;
+		model.base = reset ? base : vpixels.base;
+		model.x = horizontal ? reset ? base : vpixels.head : ipixels.center;
+		model.y = horizontal ? ipixels.center : reset ? base : vpixels.head;
+		model.height = horizontal ? ipixels.size : undefined;
+		model.width = horizontal ? undefined : ipixels.size;
+	},
+
+	/**
+	 * Returns the stacks based on groups and bar visibility.
+	 * @param {number} [last] - The dataset index
+	 * @returns {string[]} The list of stack IDs
+	 * @private
+	 */
+	_getStacks: function(last) {
+		var me = this;
+		var chart = me.chart;
+		var scale = me._getIndexScale();
+		var stacked = scale.options.stacked;
+		var ilen = last === undefined ? chart.data.datasets.length : last + 1;
+		var stacks = [];
+		var i, meta;
+
+		for (i = 0; i < ilen; ++i) {
+			meta = chart.getDatasetMeta(i);
+			if (meta.bar && chart.isDatasetVisible(i) &&
+				(stacked === false ||
+				(stacked === true && stacks.indexOf(meta.stack) === -1) ||
+				(stacked === undefined && (meta.stack === undefined || stacks.indexOf(meta.stack) === -1)))) {
+				stacks.push(meta.stack);
+			}
+		}
+
+		return stacks;
+	},
+
+	/**
+	 * Returns the effective number of stacks based on groups and bar visibility.
+	 * @private
+	 */
+	getStackCount: function() {
+		return this._getStacks().length;
+	},
+
+	/**
+	 * Returns the stack index for the given dataset based on groups and bar visibility.
+	 * @param {number} [datasetIndex] - The dataset index
+	 * @param {string} [name] - The stack name to find
+	 * @returns {number} The stack index
+	 * @private
+	 */
+	getStackIndex: function(datasetIndex, name) {
+		var stacks = this._getStacks(datasetIndex);
+		var index = (name !== undefined)
+			? stacks.indexOf(name)
+			: -1; // indexOf returns -1 if element is not present
+
+		return (index === -1)
+			? stacks.length - 1
+			: index;
+	},
+
+	/**
+	 * @private
+	 */
+	getRuler: function() {
+		var me = this;
+		var scale = me._getIndexScale();
+		var stackCount = me.getStackCount();
+		var datasetIndex = me.index;
+		var isHorizontal = scale.isHorizontal();
+		var start = isHorizontal ? scale.left : scale.top;
+		var end = start + (isHorizontal ? scale.width : scale.height);
+		var pixels = [];
+		var i, ilen, min;
+
+		for (i = 0, ilen = me.getMeta().data.length; i < ilen; ++i) {
+			pixels.push(scale.getPixelForValue(null, i, datasetIndex));
+		}
+
+		min = helpers$1.isNullOrUndef(scale.options.barThickness)
+			? computeMinSampleSize(scale, pixels)
+			: -1;
+
+		return {
+			min: min,
+			pixels: pixels,
+			start: start,
+			end: end,
+			stackCount: stackCount,
+			scale: scale
+		};
+	},
+
+	/**
+	 * Note: pixel values are not clamped to the scale area.
+	 * @private
+	 */
+	calculateBarValuePixels: function(datasetIndex, index) {
+		var me = this;
+		var chart = me.chart;
+		var meta = me.getMeta();
+		var scale = me._getValueScale();
+		var isHorizontal = scale.isHorizontal();
+		var datasets = chart.data.datasets;
+		var value = +scale.getRightValue(datasets[datasetIndex].data[index]);
+		var minBarLength = scale.options.minBarLength;
+		var stacked = scale.options.stacked;
+		var stack = meta.stack;
+		var start = 0;
+		var i, imeta, ivalue, base, head, size;
+
+		if (stacked || (stacked === undefined && stack !== undefined)) {
+			for (i = 0; i < datasetIndex; ++i) {
+				imeta = chart.getDatasetMeta(i);
+
+				if (imeta.bar &&
+					imeta.stack === stack &&
+					imeta.controller._getValueScaleId() === scale.id &&
+					chart.isDatasetVisible(i)) {
+
+					ivalue = +scale.getRightValue(datasets[i].data[index]);
+					if ((value < 0 && ivalue < 0) || (value >= 0 && ivalue > 0)) {
+						start += ivalue;
+					}
+				}
+			}
+		}
+
+		base = scale.getPixelForValue(start);
+		head = scale.getPixelForValue(start + value);
+		size = head - base;
+
+		if (minBarLength !== undefined && Math.abs(size) < minBarLength) {
+			size = minBarLength;
+			if (value >= 0 && !isHorizontal || value < 0 && isHorizontal) {
+				head = base - minBarLength;
+			} else {
+				head = base + minBarLength;
+			}
+		}
+
+		return {
+			size: size,
+			base: base,
+			head: head,
+			center: head + size / 2
+		};
+	},
+
+	/**
+	 * @private
+	 */
+	calculateBarIndexPixels: function(datasetIndex, index, ruler) {
+		var me = this;
+		var options = ruler.scale.options;
+		var range = options.barThickness === 'flex'
+			? computeFlexCategoryTraits(index, ruler, options)
+			: computeFitCategoryTraits(index, ruler, options);
+
+		var stackIndex = me.getStackIndex(datasetIndex, me.getMeta().stack);
+		var center = range.start + (range.chunk * stackIndex) + (range.chunk / 2);
+		var size = Math.min(
+			helpers$1.valueOrDefault(options.maxBarThickness, Infinity),
+			range.chunk * range.ratio);
+
+		return {
+			base: center - size / 2,
+			head: center + size / 2,
+			center: center,
+			size: size
+		};
+	},
+
+	draw: function() {
+		var me = this;
+		var chart = me.chart;
+		var scale = me._getValueScale();
+		var rects = me.getMeta().data;
+		var dataset = me.getDataset();
+		var ilen = rects.length;
+		var i = 0;
+
+		helpers$1.canvas.clipArea(chart.ctx, chart.chartArea);
+
+		for (; i < ilen; ++i) {
+			if (!isNaN(scale.getRightValue(dataset.data[i]))) {
+				rects[i].draw();
+			}
+		}
+
+		helpers$1.canvas.unclipArea(chart.ctx);
+	},
+
+	/**
+	 * @private
+	 */
+	_resolveElementOptions: function(rectangle, index) {
+		var me = this;
+		var chart = me.chart;
+		var datasets = chart.data.datasets;
+		var dataset = datasets[me.index];
+		var custom = rectangle.custom || {};
+		var options = chart.options.elements.rectangle;
+		var values = {};
+		var i, ilen, key;
+
+		// Scriptable options
+		var context = {
+			chart: chart,
+			dataIndex: index,
+			dataset: dataset,
+			datasetIndex: me.index
+		};
+
+		var keys = [
+			'backgroundColor',
+			'borderColor',
+			'borderSkipped',
+			'borderWidth'
+		];
+
+		for (i = 0, ilen = keys.length; i < ilen; ++i) {
+			key = keys[i];
+			values[key] = resolve$1([
+				custom[key],
+				dataset[key],
+				options[key]
+			], context, index);
+		}
+
+		return values;
+	}
+});
+
+var valueOrDefault$3 = helpers$1.valueOrDefault;
+var resolve$2 = helpers$1.options.resolve;
+
+core_defaults._set('bubble', {
+	hover: {
+		mode: 'single'
+	},
+
+	scales: {
+		xAxes: [{
+			type: 'linear', // bubble should probably use a linear scale by default
+			position: 'bottom',
+			id: 'x-axis-0' // need an ID so datasets can reference the scale
+		}],
+		yAxes: [{
+			type: 'linear',
+			position: 'left',
+			id: 'y-axis-0'
+		}]
+	},
+
+	tooltips: {
+		callbacks: {
+			title: function() {
+				// Title doesn't make sense for scatter since we format the data as a point
+				return '';
+			},
+			label: function(item, data) {
+				var datasetLabel = data.datasets[item.datasetIndex].label || '';
+				var dataPoint = data.datasets[item.datasetIndex].data[item.index];
+				return datasetLabel + ': (' + item.xLabel + ', ' + item.yLabel + ', ' + dataPoint.r + ')';
+			}
+		}
+	}
+});
+
+var controller_bubble = core_datasetController.extend({
+	/**
+	 * @protected
+	 */
+	dataElementType: elements.Point,
+
+	/**
+	 * @protected
+	 */
+	update: function(reset) {
+		var me = this;
+		var meta = me.getMeta();
+		var points = meta.data;
+
+		// Update Points
+		helpers$1.each(points, function(point, index) {
+			me.updateElement(point, index, reset);
+		});
+	},
+
+	/**
+	 * @protected
+	 */
+	updateElement: function(point, index, reset) {
+		var me = this;
+		var meta = me.getMeta();
+		var custom = point.custom || {};
+		var xScale = me.getScaleForId(meta.xAxisID);
+		var yScale = me.getScaleForId(meta.yAxisID);
+		var options = me._resolveElementOptions(point, index);
+		var data = me.getDataset().data[index];
+		var dsIndex = me.index;
+
+		var x = reset ? xScale.getPixelForDecimal(0.5) : xScale.getPixelForValue(typeof data === 'object' ? data : NaN, index, dsIndex);
+		var y = reset ? yScale.getBasePixel() : yScale.getPixelForValue(data, index, dsIndex);
+
+		point._xScale = xScale;
+		point._yScale = yScale;
+		point._options = options;
+		point._datasetIndex = dsIndex;
+		point._index = index;
+		point._model = {
+			backgroundColor: options.backgroundColor,
+			borderColor: options.borderColor,
+			borderWidth: options.borderWidth,
+			hitRadius: options.hitRadius,
+			pointStyle: options.pointStyle,
+			rotation: options.rotation,
+			radius: reset ? 0 : options.radius,
+			skip: custom.skip || isNaN(x) || isNaN(y),
+			x: x,
+			y: y,
+		};
+
+		point.pivot();
+	},
+
+	/**
+	 * @protected
+	 */
+	setHoverStyle: function(point) {
+		var model = point._model;
+		var options = point._options;
+		var getHoverColor = helpers$1.getHoverColor;
+
+		point.$previousStyle = {
+			backgroundColor: model.backgroundColor,
+			borderColor: model.borderColor,
+			borderWidth: model.borderWidth,
+			radius: model.radius
+		};
+
+		model.backgroundColor = valueOrDefault$3(options.hoverBackgroundColor, getHoverColor(options.backgroundColor));
+		model.borderColor = valueOrDefault$3(options.hoverBorderColor, getHoverColor(options.borderColor));
+		model.borderWidth = valueOrDefault$3(options.hoverBorderWidth, options.borderWidth);
+		model.radius = options.radius + options.hoverRadius;
+	},
+
+	/**
+	 * @private
+	 */
+	_resolveElementOptions: function(point, index) {
+		var me = this;
+		var chart = me.chart;
+		var datasets = chart.data.datasets;
+		var dataset = datasets[me.index];
+		var custom = point.custom || {};
+		var options = chart.options.elements.point;
+		var data = dataset.data[index];
+		var values = {};
+		var i, ilen, key;
+
+		// Scriptable options
+		var context = {
+			chart: chart,
+			dataIndex: index,
+			dataset: dataset,
+			datasetIndex: me.index
+		};
+
+		var keys = [
+			'backgroundColor',
+			'borderColor',
+			'borderWidth',
+			'hoverBackgroundColor',
+			'hoverBorderColor',
+			'hoverBorderWidth',
+			'hoverRadius',
+			'hitRadius',
+			'pointStyle',
+			'rotation'
+		];
+
+		for (i = 0, ilen = keys.length; i < ilen; ++i) {
+			key = keys[i];
+			values[key] = resolve$2([
+				custom[key],
+				dataset[key],
+				options[key]
+			], context, index);
+		}
+
+		// Custom radius resolution
+		values.radius = resolve$2([
+			custom.radius,
+			data ? data.r : undefined,
+			dataset.radius,
+			options.radius
+		], context, index);
+
+		return values;
+	}
+});
+
+var resolve$3 = helpers$1.options.resolve;
+var valueOrDefault$4 = helpers$1.valueOrDefault;
+
+core_defaults._set('doughnut', {
+	animation: {
+		// Boolean - Whether we animate the rotation of the Doughnut
+		animateRotate: true,
+		// Boolean - Whether we animate scaling the Doughnut from the centre
+		animateScale: false
+	},
+	hover: {
+		mode: 'single'
+	},
+	legendCallback: function(chart) {
+		var text = [];
+		text.push('<ul class="' + chart.id + '-legend">');
+
+		var data = chart.data;
+		var datasets = data.datasets;
+		var labels = data.labels;
+
+		if (datasets.length) {
+			for (var i = 0; i < datasets[0].data.length; ++i) {
+				text.push('<li><span style="background-color:' + datasets[0].backgroundColor[i] + '"></span>');
+				if (labels[i]) {
+					text.push(labels[i]);
+				}
+				text.push('</li>');
+			}
+		}
+
+		text.push('</ul>');
+		return text.join('');
+	},
+	legend: {
+		labels: {
