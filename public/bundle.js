@@ -48529,3 +48529,1028 @@ var exports$1 = {
 			ctx.lineTo(x + Math.cos(rad) * radius, y + Math.sin(rad) * radius);
 			break;
 		}
+
+		ctx.fill();
+		ctx.stroke();
+	},
+
+	/**
+	 * Returns true if the point is inside the rectangle
+	 * @param {object} point - The point to test
+	 * @param {object} area - The rectangle
+	 * @returns {boolean}
+	 * @private
+	 */
+	_isPointInArea: function(point, area) {
+		var epsilon = 1e-6; // 1e-6 is margin in pixels for accumulated error.
+
+		return point.x > area.left - epsilon && point.x < area.right + epsilon &&
+			point.y > area.top - epsilon && point.y < area.bottom + epsilon;
+	},
+
+	clipArea: function(ctx, area) {
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+		ctx.clip();
+	},
+
+	unclipArea: function(ctx) {
+		ctx.restore();
+	},
+
+	lineTo: function(ctx, previous, target, flip) {
+		var stepped = target.steppedLine;
+		if (stepped) {
+			if (stepped === 'middle') {
+				var midpoint = (previous.x + target.x) / 2.0;
+				ctx.lineTo(midpoint, flip ? target.y : previous.y);
+				ctx.lineTo(midpoint, flip ? previous.y : target.y);
+			} else if ((stepped === 'after' && !flip) || (stepped !== 'after' && flip)) {
+				ctx.lineTo(previous.x, target.y);
+			} else {
+				ctx.lineTo(target.x, previous.y);
+			}
+			ctx.lineTo(target.x, target.y);
+			return;
+		}
+
+		if (!target.tension) {
+			ctx.lineTo(target.x, target.y);
+			return;
+		}
+
+		ctx.bezierCurveTo(
+			flip ? previous.controlPointPreviousX : previous.controlPointNextX,
+			flip ? previous.controlPointPreviousY : previous.controlPointNextY,
+			flip ? target.controlPointNextX : target.controlPointPreviousX,
+			flip ? target.controlPointNextY : target.controlPointPreviousY,
+			target.x,
+			target.y);
+	}
+};
+
+var helpers_canvas = exports$1;
+
+// DEPRECATIONS
+
+/**
+ * Provided for backward compatibility, use Chart.helpers.canvas.clear instead.
+ * @namespace Chart.helpers.clear
+ * @deprecated since version 2.7.0
+ * @todo remove at version 3
+ * @private
+ */
+helpers_core.clear = exports$1.clear;
+
+/**
+ * Provided for backward compatibility, use Chart.helpers.canvas.roundedRect instead.
+ * @namespace Chart.helpers.drawRoundedRectangle
+ * @deprecated since version 2.7.0
+ * @todo remove at version 3
+ * @private
+ */
+helpers_core.drawRoundedRectangle = function(ctx) {
+	ctx.beginPath();
+	exports$1.roundedRect.apply(exports$1, arguments);
+};
+
+var defaults = {
+	/**
+	 * @private
+	 */
+	_set: function(scope, values) {
+		return helpers_core.merge(this[scope] || (this[scope] = {}), values);
+	}
+};
+
+defaults._set('global', {
+	defaultColor: 'rgba(0,0,0,0.1)',
+	defaultFontColor: '#666',
+	defaultFontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
+	defaultFontSize: 12,
+	defaultFontStyle: 'normal',
+	defaultLineHeight: 1.2,
+	showLines: true
+});
+
+var core_defaults = defaults;
+
+var valueOrDefault = helpers_core.valueOrDefault;
+
+/**
+ * Converts the given font object into a CSS font string.
+ * @param {object} font - A font object.
+ * @return {string} The CSS font string. See https://developer.mozilla.org/en-US/docs/Web/CSS/font
+ * @private
+ */
+function toFontString(font) {
+	if (!font || helpers_core.isNullOrUndef(font.size) || helpers_core.isNullOrUndef(font.family)) {
+		return null;
+	}
+
+	return (font.style ? font.style + ' ' : '')
+		+ (font.weight ? font.weight + ' ' : '')
+		+ font.size + 'px '
+		+ font.family;
+}
+
+/**
+ * @alias Chart.helpers.options
+ * @namespace
+ */
+var helpers_options = {
+	/**
+	 * Converts the given line height `value` in pixels for a specific font `size`.
+	 * @param {number|string} value - The lineHeight to parse (eg. 1.6, '14px', '75%', '1.6em').
+	 * @param {number} size - The font size (in pixels) used to resolve relative `value`.
+	 * @returns {number} The effective line height in pixels (size * 1.2 if value is invalid).
+	 * @see https://developer.mozilla.org/en-US/docs/Web/CSS/line-height
+	 * @since 2.7.0
+	 */
+	toLineHeight: function(value, size) {
+		var matches = ('' + value).match(/^(normal|(\d+(?:\.\d+)?)(px|em|%)?)$/);
+		if (!matches || matches[1] === 'normal') {
+			return size * 1.2;
+		}
+
+		value = +matches[2];
+
+		switch (matches[3]) {
+		case 'px':
+			return value;
+		case '%':
+			value /= 100;
+			break;
+		default:
+			break;
+		}
+
+		return size * value;
+	},
+
+	/**
+	 * Converts the given value into a padding object with pre-computed width/height.
+	 * @param {number|object} value - If a number, set the value to all TRBL component,
+	 *  else, if and object, use defined properties and sets undefined ones to 0.
+	 * @returns {object} The padding values (top, right, bottom, left, width, height)
+	 * @since 2.7.0
+	 */
+	toPadding: function(value) {
+		var t, r, b, l;
+
+		if (helpers_core.isObject(value)) {
+			t = +value.top || 0;
+			r = +value.right || 0;
+			b = +value.bottom || 0;
+			l = +value.left || 0;
+		} else {
+			t = r = b = l = +value || 0;
+		}
+
+		return {
+			top: t,
+			right: r,
+			bottom: b,
+			left: l,
+			height: t + b,
+			width: l + r
+		};
+	},
+
+	/**
+	 * Parses font options and returns the font object.
+	 * @param {object} options - A object that contains font options to be parsed.
+	 * @return {object} The font object.
+	 * @todo Support font.* options and renamed to toFont().
+	 * @private
+	 */
+	_parseFont: function(options) {
+		var globalDefaults = core_defaults.global;
+		var size = valueOrDefault(options.fontSize, globalDefaults.defaultFontSize);
+		var font = {
+			family: valueOrDefault(options.fontFamily, globalDefaults.defaultFontFamily),
+			lineHeight: helpers_core.options.toLineHeight(valueOrDefault(options.lineHeight, globalDefaults.defaultLineHeight), size),
+			size: size,
+			style: valueOrDefault(options.fontStyle, globalDefaults.defaultFontStyle),
+			weight: null,
+			string: ''
+		};
+
+		font.string = toFontString(font);
+		return font;
+	},
+
+	/**
+	 * Evaluates the given `inputs` sequentially and returns the first defined value.
+	 * @param {Array} inputs - An array of values, falling back to the last value.
+	 * @param {object} [context] - If defined and the current value is a function, the value
+	 * is called with `context` as first argument and the result becomes the new input.
+	 * @param {number} [index] - If defined and the current value is an array, the value
+	 * at `index` become the new input.
+	 * @since 2.7.0
+	 */
+	resolve: function(inputs, context, index) {
+		var i, ilen, value;
+
+		for (i = 0, ilen = inputs.length; i < ilen; ++i) {
+			value = inputs[i];
+			if (value === undefined) {
+				continue;
+			}
+			if (context !== undefined && typeof value === 'function') {
+				value = value(context);
+			}
+			if (index !== undefined && helpers_core.isArray(value)) {
+				value = value[index];
+			}
+			if (value !== undefined) {
+				return value;
+			}
+		}
+	}
+};
+
+var helpers$1 = helpers_core;
+var easing = helpers_easing;
+var canvas = helpers_canvas;
+var options = helpers_options;
+helpers$1.easing = easing;
+helpers$1.canvas = canvas;
+helpers$1.options = options;
+
+function interpolate(start, view, model, ease) {
+	var keys = Object.keys(model);
+	var i, ilen, key, actual, origin, target, type, c0, c1;
+
+	for (i = 0, ilen = keys.length; i < ilen; ++i) {
+		key = keys[i];
+
+		target = model[key];
+
+		// if a value is added to the model after pivot() has been called, the view
+		// doesn't contain it, so let's initialize the view to the target value.
+		if (!view.hasOwnProperty(key)) {
+			view[key] = target;
+		}
+
+		actual = view[key];
+
+		if (actual === target || key[0] === '_') {
+			continue;
+		}
+
+		if (!start.hasOwnProperty(key)) {
+			start[key] = actual;
+		}
+
+		origin = start[key];
+
+		type = typeof target;
+
+		if (type === typeof origin) {
+			if (type === 'string') {
+				c0 = chartjsColor(origin);
+				if (c0.valid) {
+					c1 = chartjsColor(target);
+					if (c1.valid) {
+						view[key] = c1.mix(c0, ease).rgbString();
+						continue;
+					}
+				}
+			} else if (helpers$1.isFinite(origin) && helpers$1.isFinite(target)) {
+				view[key] = origin + (target - origin) * ease;
+				continue;
+			}
+		}
+
+		view[key] = target;
+	}
+}
+
+var Element = function(configuration) {
+	helpers$1.extend(this, configuration);
+	this.initialize.apply(this, arguments);
+};
+
+helpers$1.extend(Element.prototype, {
+
+	initialize: function() {
+		this.hidden = false;
+	},
+
+	pivot: function() {
+		var me = this;
+		if (!me._view) {
+			me._view = helpers$1.clone(me._model);
+		}
+		me._start = {};
+		return me;
+	},
+
+	transition: function(ease) {
+		var me = this;
+		var model = me._model;
+		var start = me._start;
+		var view = me._view;
+
+		// No animation -> No Transition
+		if (!model || ease === 1) {
+			me._view = model;
+			me._start = null;
+			return me;
+		}
+
+		if (!view) {
+			view = me._view = {};
+		}
+
+		if (!start) {
+			start = me._start = {};
+		}
+
+		interpolate(start, view, model, ease);
+
+		return me;
+	},
+
+	tooltipPosition: function() {
+		return {
+			x: this._model.x,
+			y: this._model.y
+		};
+	},
+
+	hasValue: function() {
+		return helpers$1.isNumber(this._model.x) && helpers$1.isNumber(this._model.y);
+	}
+});
+
+Element.extend = helpers$1.inherits;
+
+var core_element = Element;
+
+var exports$2 = core_element.extend({
+	chart: null, // the animation associated chart instance
+	currentStep: 0, // the current animation step
+	numSteps: 60, // default number of steps
+	easing: '', // the easing to use for this animation
+	render: null, // render function used by the animation service
+
+	onAnimationProgress: null, // user specified callback to fire on each step of the animation
+	onAnimationComplete: null, // user specified callback to fire when the animation finishes
+});
+
+var core_animation = exports$2;
+
+// DEPRECATIONS
+
+/**
+ * Provided for backward compatibility, use Chart.Animation instead
+ * @prop Chart.Animation#animationObject
+ * @deprecated since version 2.6.0
+ * @todo remove at version 3
+ */
+Object.defineProperty(exports$2.prototype, 'animationObject', {
+	get: function() {
+		return this;
+	}
+});
+
+/**
+ * Provided for backward compatibility, use Chart.Animation#chart instead
+ * @prop Chart.Animation#chartInstance
+ * @deprecated since version 2.6.0
+ * @todo remove at version 3
+ */
+Object.defineProperty(exports$2.prototype, 'chartInstance', {
+	get: function() {
+		return this.chart;
+	},
+	set: function(value) {
+		this.chart = value;
+	}
+});
+
+core_defaults._set('global', {
+	animation: {
+		duration: 1000,
+		easing: 'easeOutQuart',
+		onProgress: helpers$1.noop,
+		onComplete: helpers$1.noop
+	}
+});
+
+var core_animations = {
+	animations: [],
+	request: null,
+
+	/**
+	 * @param {Chart} chart - The chart to animate.
+	 * @param {Chart.Animation} animation - The animation that we will animate.
+	 * @param {number} duration - The animation duration in ms.
+	 * @param {boolean} lazy - if true, the chart is not marked as animating to enable more responsive interactions
+	 */
+	addAnimation: function(chart, animation, duration, lazy) {
+		var animations = this.animations;
+		var i, ilen;
+
+		animation.chart = chart;
+		animation.startTime = Date.now();
+		animation.duration = duration;
+
+		if (!lazy) {
+			chart.animating = true;
+		}
+
+		for (i = 0, ilen = animations.length; i < ilen; ++i) {
+			if (animations[i].chart === chart) {
+				animations[i] = animation;
+				return;
+			}
+		}
+
+		animations.push(animation);
+
+		// If there are no animations queued, manually kickstart a digest, for lack of a better word
+		if (animations.length === 1) {
+			this.requestAnimationFrame();
+		}
+	},
+
+	cancelAnimation: function(chart) {
+		var index = helpers$1.findIndex(this.animations, function(animation) {
+			return animation.chart === chart;
+		});
+
+		if (index !== -1) {
+			this.animations.splice(index, 1);
+			chart.animating = false;
+		}
+	},
+
+	requestAnimationFrame: function() {
+		var me = this;
+		if (me.request === null) {
+			// Skip animation frame requests until the active one is executed.
+			// This can happen when processing mouse events, e.g. 'mousemove'
+			// and 'mouseout' events will trigger multiple renders.
+			me.request = helpers$1.requestAnimFrame.call(window, function() {
+				me.request = null;
+				me.startDigest();
+			});
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	startDigest: function() {
+		var me = this;
+
+		me.advance();
+
+		// Do we have more stuff to animate?
+		if (me.animations.length > 0) {
+			me.requestAnimationFrame();
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	advance: function() {
+		var animations = this.animations;
+		var animation, chart, numSteps, nextStep;
+		var i = 0;
+
+		// 1 animation per chart, so we are looping charts here
+		while (i < animations.length) {
+			animation = animations[i];
+			chart = animation.chart;
+			numSteps = animation.numSteps;
+
+			// Make sure that currentStep starts at 1
+			// https://github.com/chartjs/Chart.js/issues/6104
+			nextStep = Math.floor((Date.now() - animation.startTime) / animation.duration * numSteps) + 1;
+			animation.currentStep = Math.min(nextStep, numSteps);
+
+			helpers$1.callback(animation.render, [chart, animation], chart);
+			helpers$1.callback(animation.onAnimationProgress, [animation], chart);
+
+			if (animation.currentStep >= numSteps) {
+				helpers$1.callback(animation.onAnimationComplete, [animation], chart);
+				chart.animating = false;
+				animations.splice(i, 1);
+			} else {
+				++i;
+			}
+		}
+	}
+};
+
+var resolve = helpers$1.options.resolve;
+
+var arrayEvents = ['push', 'pop', 'shift', 'splice', 'unshift'];
+
+/**
+ * Hooks the array methods that add or remove values ('push', pop', 'shift', 'splice',
+ * 'unshift') and notify the listener AFTER the array has been altered. Listeners are
+ * called on the 'onData*' callbacks (e.g. onDataPush, etc.) with same arguments.
+ */
+function listenArrayEvents(array, listener) {
+	if (array._chartjs) {
+		array._chartjs.listeners.push(listener);
+		return;
+	}
+
+	Object.defineProperty(array, '_chartjs', {
+		configurable: true,
+		enumerable: false,
+		value: {
+			listeners: [listener]
+		}
+	});
+
+	arrayEvents.forEach(function(key) {
+		var method = 'onData' + key.charAt(0).toUpperCase() + key.slice(1);
+		var base = array[key];
+
+		Object.defineProperty(array, key, {
+			configurable: true,
+			enumerable: false,
+			value: function() {
+				var args = Array.prototype.slice.call(arguments);
+				var res = base.apply(this, args);
+
+				helpers$1.each(array._chartjs.listeners, function(object) {
+					if (typeof object[method] === 'function') {
+						object[method].apply(object, args);
+					}
+				});
+
+				return res;
+			}
+		});
+	});
+}
+
+/**
+ * Removes the given array event listener and cleanup extra attached properties (such as
+ * the _chartjs stub and overridden methods) if array doesn't have any more listeners.
+ */
+function unlistenArrayEvents(array, listener) {
+	var stub = array._chartjs;
+	if (!stub) {
+		return;
+	}
+
+	var listeners = stub.listeners;
+	var index = listeners.indexOf(listener);
+	if (index !== -1) {
+		listeners.splice(index, 1);
+	}
+
+	if (listeners.length > 0) {
+		return;
+	}
+
+	arrayEvents.forEach(function(key) {
+		delete array[key];
+	});
+
+	delete array._chartjs;
+}
+
+// Base class for all dataset controllers (line, bar, etc)
+var DatasetController = function(chart, datasetIndex) {
+	this.initialize(chart, datasetIndex);
+};
+
+helpers$1.extend(DatasetController.prototype, {
+
+	/**
+	 * Element type used to generate a meta dataset (e.g. Chart.element.Line).
+	 * @type {Chart.core.element}
+	 */
+	datasetElementType: null,
+
+	/**
+	 * Element type used to generate a meta data (e.g. Chart.element.Point).
+	 * @type {Chart.core.element}
+	 */
+	dataElementType: null,
+
+	initialize: function(chart, datasetIndex) {
+		var me = this;
+		me.chart = chart;
+		me.index = datasetIndex;
+		me.linkScales();
+		me.addElements();
+	},
+
+	updateIndex: function(datasetIndex) {
+		this.index = datasetIndex;
+	},
+
+	linkScales: function() {
+		var me = this;
+		var meta = me.getMeta();
+		var dataset = me.getDataset();
+
+		if (meta.xAxisID === null || !(meta.xAxisID in me.chart.scales)) {
+			meta.xAxisID = dataset.xAxisID || me.chart.options.scales.xAxes[0].id;
+		}
+		if (meta.yAxisID === null || !(meta.yAxisID in me.chart.scales)) {
+			meta.yAxisID = dataset.yAxisID || me.chart.options.scales.yAxes[0].id;
+		}
+	},
+
+	getDataset: function() {
+		return this.chart.data.datasets[this.index];
+	},
+
+	getMeta: function() {
+		return this.chart.getDatasetMeta(this.index);
+	},
+
+	getScaleForId: function(scaleID) {
+		return this.chart.scales[scaleID];
+	},
+
+	/**
+	 * @private
+	 */
+	_getValueScaleId: function() {
+		return this.getMeta().yAxisID;
+	},
+
+	/**
+	 * @private
+	 */
+	_getIndexScaleId: function() {
+		return this.getMeta().xAxisID;
+	},
+
+	/**
+	 * @private
+	 */
+	_getValueScale: function() {
+		return this.getScaleForId(this._getValueScaleId());
+	},
+
+	/**
+	 * @private
+	 */
+	_getIndexScale: function() {
+		return this.getScaleForId(this._getIndexScaleId());
+	},
+
+	reset: function() {
+		this.update(true);
+	},
+
+	/**
+	 * @private
+	 */
+	destroy: function() {
+		if (this._data) {
+			unlistenArrayEvents(this._data, this);
+		}
+	},
+
+	createMetaDataset: function() {
+		var me = this;
+		var type = me.datasetElementType;
+		return type && new type({
+			_chart: me.chart,
+			_datasetIndex: me.index
+		});
+	},
+
+	createMetaData: function(index) {
+		var me = this;
+		var type = me.dataElementType;
+		return type && new type({
+			_chart: me.chart,
+			_datasetIndex: me.index,
+			_index: index
+		});
+	},
+
+	addElements: function() {
+		var me = this;
+		var meta = me.getMeta();
+		var data = me.getDataset().data || [];
+		var metaData = meta.data;
+		var i, ilen;
+
+		for (i = 0, ilen = data.length; i < ilen; ++i) {
+			metaData[i] = metaData[i] || me.createMetaData(i);
+		}
+
+		meta.dataset = meta.dataset || me.createMetaDataset();
+	},
+
+	addElementAndReset: function(index) {
+		var element = this.createMetaData(index);
+		this.getMeta().data.splice(index, 0, element);
+		this.updateElement(element, index, true);
+	},
+
+	buildOrUpdateElements: function() {
+		var me = this;
+		var dataset = me.getDataset();
+		var data = dataset.data || (dataset.data = []);
+
+		// In order to correctly handle data addition/deletion animation (an thus simulate
+		// real-time charts), we need to monitor these data modifications and synchronize
+		// the internal meta data accordingly.
+		if (me._data !== data) {
+			if (me._data) {
+				// This case happens when the user replaced the data array instance.
+				unlistenArrayEvents(me._data, me);
+			}
+
+			if (data && Object.isExtensible(data)) {
+				listenArrayEvents(data, me);
+			}
+			me._data = data;
+		}
+
+		// Re-sync meta data in case the user replaced the data array or if we missed
+		// any updates and so make sure that we handle number of datapoints changing.
+		me.resyncElements();
+	},
+
+	update: helpers$1.noop,
+
+	transition: function(easingValue) {
+		var meta = this.getMeta();
+		var elements = meta.data || [];
+		var ilen = elements.length;
+		var i = 0;
+
+		for (; i < ilen; ++i) {
+			elements[i].transition(easingValue);
+		}
+
+		if (meta.dataset) {
+			meta.dataset.transition(easingValue);
+		}
+	},
+
+	draw: function() {
+		var meta = this.getMeta();
+		var elements = meta.data || [];
+		var ilen = elements.length;
+		var i = 0;
+
+		if (meta.dataset) {
+			meta.dataset.draw();
+		}
+
+		for (; i < ilen; ++i) {
+			elements[i].draw();
+		}
+	},
+
+	removeHoverStyle: function(element) {
+		helpers$1.merge(element._model, element.$previousStyle || {});
+		delete element.$previousStyle;
+	},
+
+	setHoverStyle: function(element) {
+		var dataset = this.chart.data.datasets[element._datasetIndex];
+		var index = element._index;
+		var custom = element.custom || {};
+		var model = element._model;
+		var getHoverColor = helpers$1.getHoverColor;
+
+		element.$previousStyle = {
+			backgroundColor: model.backgroundColor,
+			borderColor: model.borderColor,
+			borderWidth: model.borderWidth
+		};
+
+		model.backgroundColor = resolve([custom.hoverBackgroundColor, dataset.hoverBackgroundColor, getHoverColor(model.backgroundColor)], undefined, index);
+		model.borderColor = resolve([custom.hoverBorderColor, dataset.hoverBorderColor, getHoverColor(model.borderColor)], undefined, index);
+		model.borderWidth = resolve([custom.hoverBorderWidth, dataset.hoverBorderWidth, model.borderWidth], undefined, index);
+	},
+
+	/**
+	 * @private
+	 */
+	resyncElements: function() {
+		var me = this;
+		var meta = me.getMeta();
+		var data = me.getDataset().data;
+		var numMeta = meta.data.length;
+		var numData = data.length;
+
+		if (numData < numMeta) {
+			meta.data.splice(numData, numMeta - numData);
+		} else if (numData > numMeta) {
+			me.insertElements(numMeta, numData - numMeta);
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	insertElements: function(start, count) {
+		for (var i = 0; i < count; ++i) {
+			this.addElementAndReset(start + i);
+		}
+	},
+
+	/**
+	 * @private
+	 */
+	onDataPush: function() {
+		var count = arguments.length;
+		this.insertElements(this.getDataset().data.length - count, count);
+	},
+
+	/**
+	 * @private
+	 */
+	onDataPop: function() {
+		this.getMeta().data.pop();
+	},
+
+	/**
+	 * @private
+	 */
+	onDataShift: function() {
+		this.getMeta().data.shift();
+	},
+
+	/**
+	 * @private
+	 */
+	onDataSplice: function(start, count) {
+		this.getMeta().data.splice(start, count);
+		this.insertElements(start, arguments.length - 2);
+	},
+
+	/**
+	 * @private
+	 */
+	onDataUnshift: function() {
+		this.insertElements(0, arguments.length);
+	}
+});
+
+DatasetController.extend = helpers$1.inherits;
+
+var core_datasetController = DatasetController;
+
+core_defaults._set('global', {
+	elements: {
+		arc: {
+			backgroundColor: core_defaults.global.defaultColor,
+			borderColor: '#fff',
+			borderWidth: 2,
+			borderAlign: 'center'
+		}
+	}
+});
+
+var element_arc = core_element.extend({
+	inLabelRange: function(mouseX) {
+		var vm = this._view;
+
+		if (vm) {
+			return (Math.pow(mouseX - vm.x, 2) < Math.pow(vm.radius + vm.hoverRadius, 2));
+		}
+		return false;
+	},
+
+	inRange: function(chartX, chartY) {
+		var vm = this._view;
+
+		if (vm) {
+			var pointRelativePosition = helpers$1.getAngleFromPoint(vm, {x: chartX, y: chartY});
+			var	angle = pointRelativePosition.angle;
+			var distance = pointRelativePosition.distance;
+
+			// Sanitise angle range
+			var startAngle = vm.startAngle;
+			var endAngle = vm.endAngle;
+			while (endAngle < startAngle) {
+				endAngle += 2.0 * Math.PI;
+			}
+			while (angle > endAngle) {
+				angle -= 2.0 * Math.PI;
+			}
+			while (angle < startAngle) {
+				angle += 2.0 * Math.PI;
+			}
+
+			// Check if within the range of the open/close angle
+			var betweenAngles = (angle >= startAngle && angle <= endAngle);
+			var withinRadius = (distance >= vm.innerRadius && distance <= vm.outerRadius);
+
+			return (betweenAngles && withinRadius);
+		}
+		return false;
+	},
+
+	getCenterPoint: function() {
+		var vm = this._view;
+		var halfAngle = (vm.startAngle + vm.endAngle) / 2;
+		var halfRadius = (vm.innerRadius + vm.outerRadius) / 2;
+		return {
+			x: vm.x + Math.cos(halfAngle) * halfRadius,
+			y: vm.y + Math.sin(halfAngle) * halfRadius
+		};
+	},
+
+	getArea: function() {
+		var vm = this._view;
+		return Math.PI * ((vm.endAngle - vm.startAngle) / (2 * Math.PI)) * (Math.pow(vm.outerRadius, 2) - Math.pow(vm.innerRadius, 2));
+	},
+
+	tooltipPosition: function() {
+		var vm = this._view;
+		var centreAngle = vm.startAngle + ((vm.endAngle - vm.startAngle) / 2);
+		var rangeFromCentre = (vm.outerRadius - vm.innerRadius) / 2 + vm.innerRadius;
+
+		return {
+			x: vm.x + (Math.cos(centreAngle) * rangeFromCentre),
+			y: vm.y + (Math.sin(centreAngle) * rangeFromCentre)
+		};
+	},
+
+	draw: function() {
+		var ctx = this._chart.ctx;
+		var vm = this._view;
+		var sA = vm.startAngle;
+		var eA = vm.endAngle;
+		var pixelMargin = (vm.borderAlign === 'inner') ? 0.33 : 0;
+		var angleMargin;
+
+		ctx.save();
+
+		ctx.beginPath();
+		ctx.arc(vm.x, vm.y, Math.max(vm.outerRadius - pixelMargin, 0), sA, eA);
+		ctx.arc(vm.x, vm.y, vm.innerRadius, eA, sA, true);
+		ctx.closePath();
+
+		ctx.fillStyle = vm.backgroundColor;
+		ctx.fill();
+
+		if (vm.borderWidth) {
+			if (vm.borderAlign === 'inner') {
+				// Draw an inner border by cliping the arc and drawing a double-width border
+				// Enlarge the clipping arc by 0.33 pixels to eliminate glitches between borders
+				ctx.beginPath();
+				angleMargin = pixelMargin / vm.outerRadius;
+				ctx.arc(vm.x, vm.y, vm.outerRadius, sA - angleMargin, eA + angleMargin);
+				if (vm.innerRadius > pixelMargin) {
+					angleMargin = pixelMargin / vm.innerRadius;
+					ctx.arc(vm.x, vm.y, vm.innerRadius - pixelMargin, eA + angleMargin, sA - angleMargin, true);
+				} else {
+					ctx.arc(vm.x, vm.y, pixelMargin, eA + Math.PI / 2, sA - Math.PI / 2);
+				}
+				ctx.closePath();
+				ctx.clip();
+
+				ctx.beginPath();
+				ctx.arc(vm.x, vm.y, vm.outerRadius, sA, eA);
+				ctx.arc(vm.x, vm.y, vm.innerRadius, eA, sA, true);
+				ctx.closePath();
+
+				ctx.lineWidth = vm.borderWidth * 2;
+				ctx.lineJoin = 'round';
+			} else {
+				ctx.lineWidth = vm.borderWidth;
+				ctx.lineJoin = 'bevel';
+			}
+
+			ctx.strokeStyle = vm.borderColor;
+			ctx.stroke();
+		}
+
+		ctx.restore();
+	}
+});
+
+var valueOrDefault$1 = helpers$1.valueOrDefault;
+
+var defaultColor = core_defaults.global.defaultColor;
+
+core_defaults._set('global', {
+	elements: {
+		line: {
+			tension: 0.4,
+			backgroundColor: defaultColor,
+			borderWidth: 3,
+			borderColor: defaultColor,
+			borderCapStyle: 'butt',
+			borderDash: [],
+			borderDashOffset: 0.0,
+			borderJoinStyle: 'miter',
+			capBezierPoints: true,
+			fill: true, // do we fill in the area between the line and its base axis
