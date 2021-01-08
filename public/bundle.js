@@ -51511,3 +51511,977 @@ var controller_polarArea = core_datasetController.extend({
 				y: centerY,
 				innerRadius: 0,
 				outerRadius: reset ? resetRadius : distance,
+				startAngle: reset && animationOpts.animateRotate ? datasetStartAngle : startAngle,
+				endAngle: reset && animationOpts.animateRotate ? datasetStartAngle : endAngle,
+				label: helpers$1.valueAtIndexOrDefault(labels, index, labels[index])
+			}
+		});
+
+		arc.pivot();
+	},
+
+	countVisibleElements: function() {
+		var dataset = this.getDataset();
+		var meta = this.getMeta();
+		var count = 0;
+
+		helpers$1.each(meta.data, function(element, index) {
+			if (!isNaN(dataset.data[index]) && !element.hidden) {
+				count++;
+			}
+		});
+
+		return count;
+	},
+
+	/**
+	 * @protected
+	 */
+	setHoverStyle: function(arc) {
+		var model = arc._model;
+		var options = arc._options;
+		var getHoverColor = helpers$1.getHoverColor;
+		var valueOrDefault = helpers$1.valueOrDefault;
+
+		arc.$previousStyle = {
+			backgroundColor: model.backgroundColor,
+			borderColor: model.borderColor,
+			borderWidth: model.borderWidth,
+		};
+
+		model.backgroundColor = valueOrDefault(options.hoverBackgroundColor, getHoverColor(options.backgroundColor));
+		model.borderColor = valueOrDefault(options.hoverBorderColor, getHoverColor(options.borderColor));
+		model.borderWidth = valueOrDefault(options.hoverBorderWidth, options.borderWidth);
+	},
+
+	/**
+	 * @private
+	 */
+	_resolveElementOptions: function(arc, index) {
+		var me = this;
+		var chart = me.chart;
+		var dataset = me.getDataset();
+		var custom = arc.custom || {};
+		var options = chart.options.elements.arc;
+		var values = {};
+		var i, ilen, key;
+
+		// Scriptable options
+		var context = {
+			chart: chart,
+			dataIndex: index,
+			dataset: dataset,
+			datasetIndex: me.index
+		};
+
+		var keys = [
+			'backgroundColor',
+			'borderColor',
+			'borderWidth',
+			'borderAlign',
+			'hoverBackgroundColor',
+			'hoverBorderColor',
+			'hoverBorderWidth',
+		];
+
+		for (i = 0, ilen = keys.length; i < ilen; ++i) {
+			key = keys[i];
+			values[key] = resolve$5([
+				custom[key],
+				dataset[key],
+				options[key]
+			], context, index);
+		}
+
+		return values;
+	},
+
+	/**
+	 * @private
+	 */
+	_computeAngle: function(index) {
+		var me = this;
+		var count = this.getMeta().count;
+		var dataset = me.getDataset();
+		var meta = me.getMeta();
+
+		if (isNaN(dataset.data[index]) || meta.data[index].hidden) {
+			return 0;
+		}
+
+		// Scriptable options
+		var context = {
+			chart: me.chart,
+			dataIndex: index,
+			dataset: dataset,
+			datasetIndex: me.index
+		};
+
+		return resolve$5([
+			me.chart.options.elements.arc.angle,
+			(2 * Math.PI) / count
+		], context, index);
+	}
+});
+
+core_defaults._set('pie', helpers$1.clone(core_defaults.doughnut));
+core_defaults._set('pie', {
+	cutoutPercentage: 0
+});
+
+// Pie charts are Doughnut chart with different defaults
+var controller_pie = controller_doughnut;
+
+var valueOrDefault$6 = helpers$1.valueOrDefault;
+var resolve$6 = helpers$1.options.resolve;
+
+core_defaults._set('radar', {
+	scale: {
+		type: 'radialLinear'
+	},
+	elements: {
+		line: {
+			tension: 0 // no bezier in radar
+		}
+	}
+});
+
+var controller_radar = core_datasetController.extend({
+
+	datasetElementType: elements.Line,
+
+	dataElementType: elements.Point,
+
+	linkScales: helpers$1.noop,
+
+	update: function(reset) {
+		var me = this;
+		var meta = me.getMeta();
+		var line = meta.dataset;
+		var points = meta.data || [];
+		var scale = me.chart.scale;
+		var dataset = me.getDataset();
+		var i, ilen;
+
+		// Compatibility: If the properties are defined with only the old name, use those values
+		if ((dataset.tension !== undefined) && (dataset.lineTension === undefined)) {
+			dataset.lineTension = dataset.tension;
+		}
+
+		// Utility
+		line._scale = scale;
+		line._datasetIndex = me.index;
+		// Data
+		line._children = points;
+		line._loop = true;
+		// Model
+		line._model = me._resolveLineOptions(line);
+
+		line.pivot();
+
+		// Update Points
+		for (i = 0, ilen = points.length; i < ilen; ++i) {
+			me.updateElement(points[i], i, reset);
+		}
+
+		// Update bezier control points
+		me.updateBezierControlPoints();
+
+		// Now pivot the point for animation
+		for (i = 0, ilen = points.length; i < ilen; ++i) {
+			points[i].pivot();
+		}
+	},
+
+	updateElement: function(point, index, reset) {
+		var me = this;
+		var custom = point.custom || {};
+		var dataset = me.getDataset();
+		var scale = me.chart.scale;
+		var pointPosition = scale.getPointPositionForValue(index, dataset.data[index]);
+		var options = me._resolvePointOptions(point, index);
+		var lineModel = me.getMeta().dataset._model;
+		var x = reset ? scale.xCenter : pointPosition.x;
+		var y = reset ? scale.yCenter : pointPosition.y;
+
+		// Utility
+		point._scale = scale;
+		point._options = options;
+		point._datasetIndex = me.index;
+		point._index = index;
+
+		// Desired view properties
+		point._model = {
+			x: x, // value not used in dataset scale, but we want a consistent API between scales
+			y: y,
+			skip: custom.skip || isNaN(x) || isNaN(y),
+			// Appearance
+			radius: options.radius,
+			pointStyle: options.pointStyle,
+			rotation: options.rotation,
+			backgroundColor: options.backgroundColor,
+			borderColor: options.borderColor,
+			borderWidth: options.borderWidth,
+			tension: valueOrDefault$6(custom.tension, lineModel ? lineModel.tension : 0),
+
+			// Tooltip
+			hitRadius: options.hitRadius
+		};
+	},
+
+	/**
+	 * @private
+	 */
+	_resolvePointOptions: function(element, index) {
+		var me = this;
+		var chart = me.chart;
+		var dataset = chart.data.datasets[me.index];
+		var custom = element.custom || {};
+		var options = chart.options.elements.point;
+		var values = {};
+		var i, ilen, key;
+
+		// Scriptable options
+		var context = {
+			chart: chart,
+			dataIndex: index,
+			dataset: dataset,
+			datasetIndex: me.index
+		};
+
+		var ELEMENT_OPTIONS = {
+			backgroundColor: 'pointBackgroundColor',
+			borderColor: 'pointBorderColor',
+			borderWidth: 'pointBorderWidth',
+			hitRadius: 'pointHitRadius',
+			hoverBackgroundColor: 'pointHoverBackgroundColor',
+			hoverBorderColor: 'pointHoverBorderColor',
+			hoverBorderWidth: 'pointHoverBorderWidth',
+			hoverRadius: 'pointHoverRadius',
+			pointStyle: 'pointStyle',
+			radius: 'pointRadius',
+			rotation: 'pointRotation'
+		};
+		var keys = Object.keys(ELEMENT_OPTIONS);
+
+		for (i = 0, ilen = keys.length; i < ilen; ++i) {
+			key = keys[i];
+			values[key] = resolve$6([
+				custom[key],
+				dataset[ELEMENT_OPTIONS[key]],
+				dataset[key],
+				options[key]
+			], context, index);
+		}
+
+		return values;
+	},
+
+	/**
+	 * @private
+	 */
+	_resolveLineOptions: function(element) {
+		var me = this;
+		var chart = me.chart;
+		var dataset = chart.data.datasets[me.index];
+		var custom = element.custom || {};
+		var options = chart.options.elements.line;
+		var values = {};
+		var i, ilen, key;
+
+		var keys = [
+			'backgroundColor',
+			'borderWidth',
+			'borderColor',
+			'borderCapStyle',
+			'borderDash',
+			'borderDashOffset',
+			'borderJoinStyle',
+			'fill'
+		];
+
+		for (i = 0, ilen = keys.length; i < ilen; ++i) {
+			key = keys[i];
+			values[key] = resolve$6([
+				custom[key],
+				dataset[key],
+				options[key]
+			]);
+		}
+
+		values.tension = valueOrDefault$6(dataset.lineTension, options.tension);
+
+		return values;
+	},
+
+	updateBezierControlPoints: function() {
+		var me = this;
+		var meta = me.getMeta();
+		var area = me.chart.chartArea;
+		var points = meta.data || [];
+		var i, ilen, model, controlPoints;
+
+		function capControlPoint(pt, min, max) {
+			return Math.max(Math.min(pt, max), min);
+		}
+
+		for (i = 0, ilen = points.length; i < ilen; ++i) {
+			model = points[i]._model;
+			controlPoints = helpers$1.splineCurve(
+				helpers$1.previousItem(points, i, true)._model,
+				model,
+				helpers$1.nextItem(points, i, true)._model,
+				model.tension
+			);
+
+			// Prevent the bezier going outside of the bounds of the graph
+			model.controlPointPreviousX = capControlPoint(controlPoints.previous.x, area.left, area.right);
+			model.controlPointPreviousY = capControlPoint(controlPoints.previous.y, area.top, area.bottom);
+			model.controlPointNextX = capControlPoint(controlPoints.next.x, area.left, area.right);
+			model.controlPointNextY = capControlPoint(controlPoints.next.y, area.top, area.bottom);
+		}
+	},
+
+	setHoverStyle: function(point) {
+		var model = point._model;
+		var options = point._options;
+		var getHoverColor = helpers$1.getHoverColor;
+
+		point.$previousStyle = {
+			backgroundColor: model.backgroundColor,
+			borderColor: model.borderColor,
+			borderWidth: model.borderWidth,
+			radius: model.radius
+		};
+
+		model.backgroundColor = valueOrDefault$6(options.hoverBackgroundColor, getHoverColor(options.backgroundColor));
+		model.borderColor = valueOrDefault$6(options.hoverBorderColor, getHoverColor(options.borderColor));
+		model.borderWidth = valueOrDefault$6(options.hoverBorderWidth, options.borderWidth);
+		model.radius = valueOrDefault$6(options.hoverRadius, options.radius);
+	}
+});
+
+core_defaults._set('scatter', {
+	hover: {
+		mode: 'single'
+	},
+
+	scales: {
+		xAxes: [{
+			id: 'x-axis-1',    // need an ID so datasets can reference the scale
+			type: 'linear',    // scatter should not use a category axis
+			position: 'bottom'
+		}],
+		yAxes: [{
+			id: 'y-axis-1',
+			type: 'linear',
+			position: 'left'
+		}]
+	},
+
+	showLines: false,
+
+	tooltips: {
+		callbacks: {
+			title: function() {
+				return '';     // doesn't make sense for scatter since data are formatted as a point
+			},
+			label: function(item) {
+				return '(' + item.xLabel + ', ' + item.yLabel + ')';
+			}
+		}
+	}
+});
+
+// Scatter charts use line controllers
+var controller_scatter = controller_line;
+
+// NOTE export a map in which the key represents the controller type, not
+// the class, and so must be CamelCase in order to be correctly retrieved
+// by the controller in core.controller.js (`controllers[meta.type]`).
+
+var controllers = {
+	bar: controller_bar,
+	bubble: controller_bubble,
+	doughnut: controller_doughnut,
+	horizontalBar: controller_horizontalBar,
+	line: controller_line,
+	polarArea: controller_polarArea,
+	pie: controller_pie,
+	radar: controller_radar,
+	scatter: controller_scatter
+};
+
+/**
+ * Helper function to get relative position for an event
+ * @param {Event|IEvent} event - The event to get the position for
+ * @param {Chart} chart - The chart
+ * @returns {object} the event position
+ */
+function getRelativePosition(e, chart) {
+	if (e.native) {
+		return {
+			x: e.x,
+			y: e.y
+		};
+	}
+
+	return helpers$1.getRelativePosition(e, chart);
+}
+
+/**
+ * Helper function to traverse all of the visible elements in the chart
+ * @param {Chart} chart - the chart
+ * @param {function} handler - the callback to execute for each visible item
+ */
+function parseVisibleItems(chart, handler) {
+	var datasets = chart.data.datasets;
+	var meta, i, j, ilen, jlen;
+
+	for (i = 0, ilen = datasets.length; i < ilen; ++i) {
+		if (!chart.isDatasetVisible(i)) {
+			continue;
+		}
+
+		meta = chart.getDatasetMeta(i);
+		for (j = 0, jlen = meta.data.length; j < jlen; ++j) {
+			var element = meta.data[j];
+			if (!element._view.skip) {
+				handler(element);
+			}
+		}
+	}
+}
+
+/**
+ * Helper function to get the items that intersect the event position
+ * @param {ChartElement[]} items - elements to filter
+ * @param {object} position - the point to be nearest to
+ * @return {ChartElement[]} the nearest items
+ */
+function getIntersectItems(chart, position) {
+	var elements = [];
+
+	parseVisibleItems(chart, function(element) {
+		if (element.inRange(position.x, position.y)) {
+			elements.push(element);
+		}
+	});
+
+	return elements;
+}
+
+/**
+ * Helper function to get the items nearest to the event position considering all visible items in teh chart
+ * @param {Chart} chart - the chart to look at elements from
+ * @param {object} position - the point to be nearest to
+ * @param {boolean} intersect - if true, only consider items that intersect the position
+ * @param {function} distanceMetric - function to provide the distance between points
+ * @return {ChartElement[]} the nearest items
+ */
+function getNearestItems(chart, position, intersect, distanceMetric) {
+	var minDistance = Number.POSITIVE_INFINITY;
+	var nearestItems = [];
+
+	parseVisibleItems(chart, function(element) {
+		if (intersect && !element.inRange(position.x, position.y)) {
+			return;
+		}
+
+		var center = element.getCenterPoint();
+		var distance = distanceMetric(position, center);
+		if (distance < minDistance) {
+			nearestItems = [element];
+			minDistance = distance;
+		} else if (distance === minDistance) {
+			// Can have multiple items at the same distance in which case we sort by size
+			nearestItems.push(element);
+		}
+	});
+
+	return nearestItems;
+}
+
+/**
+ * Get a distance metric function for two points based on the
+ * axis mode setting
+ * @param {string} axis - the axis mode. x|y|xy
+ */
+function getDistanceMetricForAxis(axis) {
+	var useX = axis.indexOf('x') !== -1;
+	var useY = axis.indexOf('y') !== -1;
+
+	return function(pt1, pt2) {
+		var deltaX = useX ? Math.abs(pt1.x - pt2.x) : 0;
+		var deltaY = useY ? Math.abs(pt1.y - pt2.y) : 0;
+		return Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+	};
+}
+
+function indexMode(chart, e, options) {
+	var position = getRelativePosition(e, chart);
+	// Default axis for index mode is 'x' to match old behaviour
+	options.axis = options.axis || 'x';
+	var distanceMetric = getDistanceMetricForAxis(options.axis);
+	var items = options.intersect ? getIntersectItems(chart, position) : getNearestItems(chart, position, false, distanceMetric);
+	var elements = [];
+
+	if (!items.length) {
+		return [];
+	}
+
+	chart.data.datasets.forEach(function(dataset, datasetIndex) {
+		if (chart.isDatasetVisible(datasetIndex)) {
+			var meta = chart.getDatasetMeta(datasetIndex);
+			var element = meta.data[items[0]._index];
+
+			// don't count items that are skipped (null data)
+			if (element && !element._view.skip) {
+				elements.push(element);
+			}
+		}
+	});
+
+	return elements;
+}
+
+/**
+ * @interface IInteractionOptions
+ */
+/**
+ * If true, only consider items that intersect the point
+ * @name IInterfaceOptions#boolean
+ * @type Boolean
+ */
+
+/**
+ * Contains interaction related functions
+ * @namespace Chart.Interaction
+ */
+var core_interaction = {
+	// Helper function for different modes
+	modes: {
+		single: function(chart, e) {
+			var position = getRelativePosition(e, chart);
+			var elements = [];
+
+			parseVisibleItems(chart, function(element) {
+				if (element.inRange(position.x, position.y)) {
+					elements.push(element);
+					return elements;
+				}
+			});
+
+			return elements.slice(0, 1);
+		},
+
+		/**
+		 * @function Chart.Interaction.modes.label
+		 * @deprecated since version 2.4.0
+		 * @todo remove at version 3
+		 * @private
+		 */
+		label: indexMode,
+
+		/**
+		 * Returns items at the same index. If the options.intersect parameter is true, we only return items if we intersect something
+		 * If the options.intersect mode is false, we find the nearest item and return the items at the same index as that item
+		 * @function Chart.Interaction.modes.index
+		 * @since v2.4.0
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @param {IInteractionOptions} options - options to use during interaction
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		index: indexMode,
+
+		/**
+		 * Returns items in the same dataset. If the options.intersect parameter is true, we only return items if we intersect something
+		 * If the options.intersect is false, we find the nearest item and return the items in that dataset
+		 * @function Chart.Interaction.modes.dataset
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @param {IInteractionOptions} options - options to use during interaction
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		dataset: function(chart, e, options) {
+			var position = getRelativePosition(e, chart);
+			options.axis = options.axis || 'xy';
+			var distanceMetric = getDistanceMetricForAxis(options.axis);
+			var items = options.intersect ? getIntersectItems(chart, position) : getNearestItems(chart, position, false, distanceMetric);
+
+			if (items.length > 0) {
+				items = chart.getDatasetMeta(items[0]._datasetIndex).data;
+			}
+
+			return items;
+		},
+
+		/**
+		 * @function Chart.Interaction.modes.x-axis
+		 * @deprecated since version 2.4.0. Use index mode and intersect == true
+		 * @todo remove at version 3
+		 * @private
+		 */
+		'x-axis': function(chart, e) {
+			return indexMode(chart, e, {intersect: false});
+		},
+
+		/**
+		 * Point mode returns all elements that hit test based on the event position
+		 * of the event
+		 * @function Chart.Interaction.modes.intersect
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		point: function(chart, e) {
+			var position = getRelativePosition(e, chart);
+			return getIntersectItems(chart, position);
+		},
+
+		/**
+		 * nearest mode returns the element closest to the point
+		 * @function Chart.Interaction.modes.intersect
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @param {IInteractionOptions} options - options to use
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		nearest: function(chart, e, options) {
+			var position = getRelativePosition(e, chart);
+			options.axis = options.axis || 'xy';
+			var distanceMetric = getDistanceMetricForAxis(options.axis);
+			return getNearestItems(chart, position, options.intersect, distanceMetric);
+		},
+
+		/**
+		 * x mode returns the elements that hit-test at the current x coordinate
+		 * @function Chart.Interaction.modes.x
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @param {IInteractionOptions} options - options to use
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		x: function(chart, e, options) {
+			var position = getRelativePosition(e, chart);
+			var items = [];
+			var intersectsItem = false;
+
+			parseVisibleItems(chart, function(element) {
+				if (element.inXRange(position.x)) {
+					items.push(element);
+				}
+
+				if (element.inRange(position.x, position.y)) {
+					intersectsItem = true;
+				}
+			});
+
+			// If we want to trigger on an intersect and we don't have any items
+			// that intersect the position, return nothing
+			if (options.intersect && !intersectsItem) {
+				items = [];
+			}
+			return items;
+		},
+
+		/**
+		 * y mode returns the elements that hit-test at the current y coordinate
+		 * @function Chart.Interaction.modes.y
+		 * @param {Chart} chart - the chart we are returning items from
+		 * @param {Event} e - the event we are find things at
+		 * @param {IInteractionOptions} options - options to use
+		 * @return {Chart.Element[]} Array of elements that are under the point. If none are found, an empty array is returned
+		 */
+		y: function(chart, e, options) {
+			var position = getRelativePosition(e, chart);
+			var items = [];
+			var intersectsItem = false;
+
+			parseVisibleItems(chart, function(element) {
+				if (element.inYRange(position.y)) {
+					items.push(element);
+				}
+
+				if (element.inRange(position.x, position.y)) {
+					intersectsItem = true;
+				}
+			});
+
+			// If we want to trigger on an intersect and we don't have any items
+			// that intersect the position, return nothing
+			if (options.intersect && !intersectsItem) {
+				items = [];
+			}
+			return items;
+		}
+	}
+};
+
+function filterByPosition(array, position) {
+	return helpers$1.where(array, function(v) {
+		return v.position === position;
+	});
+}
+
+function sortByWeight(array, reverse) {
+	array.forEach(function(v, i) {
+		v._tmpIndex_ = i;
+		return v;
+	});
+	array.sort(function(a, b) {
+		var v0 = reverse ? b : a;
+		var v1 = reverse ? a : b;
+		return v0.weight === v1.weight ?
+			v0._tmpIndex_ - v1._tmpIndex_ :
+			v0.weight - v1.weight;
+	});
+	array.forEach(function(v) {
+		delete v._tmpIndex_;
+	});
+}
+
+function findMaxPadding(boxes) {
+	var top = 0;
+	var left = 0;
+	var bottom = 0;
+	var right = 0;
+	helpers$1.each(boxes, function(box) {
+		if (box.getPadding) {
+			var boxPadding = box.getPadding();
+			top = Math.max(top, boxPadding.top);
+			left = Math.max(left, boxPadding.left);
+			bottom = Math.max(bottom, boxPadding.bottom);
+			right = Math.max(right, boxPadding.right);
+		}
+	});
+	return {
+		top: top,
+		left: left,
+		bottom: bottom,
+		right: right
+	};
+}
+
+function addSizeByPosition(boxes, size) {
+	helpers$1.each(boxes, function(box) {
+		size[box.position] += box.isHorizontal() ? box.height : box.width;
+	});
+}
+
+core_defaults._set('global', {
+	layout: {
+		padding: {
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0
+		}
+	}
+});
+
+/**
+ * @interface ILayoutItem
+ * @prop {string} position - The position of the item in the chart layout. Possible values are
+ * 'left', 'top', 'right', 'bottom', and 'chartArea'
+ * @prop {number} weight - The weight used to sort the item. Higher weights are further away from the chart area
+ * @prop {boolean} fullWidth - if true, and the item is horizontal, then push vertical boxes down
+ * @prop {function} isHorizontal - returns true if the layout item is horizontal (ie. top or bottom)
+ * @prop {function} update - Takes two parameters: width and height. Returns size of item
+ * @prop {function} getPadding -  Returns an object with padding on the edges
+ * @prop {number} width - Width of item. Must be valid after update()
+ * @prop {number} height - Height of item. Must be valid after update()
+ * @prop {number} left - Left edge of the item. Set by layout system and cannot be used in update
+ * @prop {number} top - Top edge of the item. Set by layout system and cannot be used in update
+ * @prop {number} right - Right edge of the item. Set by layout system and cannot be used in update
+ * @prop {number} bottom - Bottom edge of the item. Set by layout system and cannot be used in update
+ */
+
+// The layout service is very self explanatory.  It's responsible for the layout within a chart.
+// Scales, Legends and Plugins all rely on the layout service and can easily register to be placed anywhere they need
+// It is this service's responsibility of carrying out that layout.
+var core_layouts = {
+	defaults: {},
+
+	/**
+	 * Register a box to a chart.
+	 * A box is simply a reference to an object that requires layout. eg. Scales, Legend, Title.
+	 * @param {Chart} chart - the chart to use
+	 * @param {ILayoutItem} item - the item to add to be layed out
+	 */
+	addBox: function(chart, item) {
+		if (!chart.boxes) {
+			chart.boxes = [];
+		}
+
+		// initialize item with default values
+		item.fullWidth = item.fullWidth || false;
+		item.position = item.position || 'top';
+		item.weight = item.weight || 0;
+
+		chart.boxes.push(item);
+	},
+
+	/**
+	 * Remove a layoutItem from a chart
+	 * @param {Chart} chart - the chart to remove the box from
+	 * @param {ILayoutItem} layoutItem - the item to remove from the layout
+	 */
+	removeBox: function(chart, layoutItem) {
+		var index = chart.boxes ? chart.boxes.indexOf(layoutItem) : -1;
+		if (index !== -1) {
+			chart.boxes.splice(index, 1);
+		}
+	},
+
+	/**
+	 * Sets (or updates) options on the given `item`.
+	 * @param {Chart} chart - the chart in which the item lives (or will be added to)
+	 * @param {ILayoutItem} item - the item to configure with the given options
+	 * @param {object} options - the new item options.
+	 */
+	configure: function(chart, item, options) {
+		var props = ['fullWidth', 'position', 'weight'];
+		var ilen = props.length;
+		var i = 0;
+		var prop;
+
+		for (; i < ilen; ++i) {
+			prop = props[i];
+			if (options.hasOwnProperty(prop)) {
+				item[prop] = options[prop];
+			}
+		}
+	},
+
+	/**
+	 * Fits boxes of the given chart into the given size by having each box measure itself
+	 * then running a fitting algorithm
+	 * @param {Chart} chart - the chart
+	 * @param {number} width - the width to fit into
+	 * @param {number} height - the height to fit into
+	 */
+	update: function(chart, width, height) {
+		if (!chart) {
+			return;
+		}
+
+		var layoutOptions = chart.options.layout || {};
+		var padding = helpers$1.options.toPadding(layoutOptions.padding);
+		var leftPadding = padding.left;
+		var rightPadding = padding.right;
+		var topPadding = padding.top;
+		var bottomPadding = padding.bottom;
+
+		var leftBoxes = filterByPosition(chart.boxes, 'left');
+		var rightBoxes = filterByPosition(chart.boxes, 'right');
+		var topBoxes = filterByPosition(chart.boxes, 'top');
+		var bottomBoxes = filterByPosition(chart.boxes, 'bottom');
+		var chartAreaBoxes = filterByPosition(chart.boxes, 'chartArea');
+
+		// Sort boxes by weight. A higher weight is further away from the chart area
+		sortByWeight(leftBoxes, true);
+		sortByWeight(rightBoxes, false);
+		sortByWeight(topBoxes, true);
+		sortByWeight(bottomBoxes, false);
+
+		var verticalBoxes = leftBoxes.concat(rightBoxes);
+		var horizontalBoxes = topBoxes.concat(bottomBoxes);
+		var outerBoxes = verticalBoxes.concat(horizontalBoxes);
+
+		// Essentially we now have any number of boxes on each of the 4 sides.
+		// Our canvas looks like the following.
+		// The areas L1 and L2 are the left axes. R1 is the right axis, T1 is the top axis and
+		// B1 is the bottom axis
+		// There are also 4 quadrant-like locations (left to right instead of clockwise) reserved for chart overlays
+		// These locations are single-box locations only, when trying to register a chartArea location that is already taken,
+		// an error will be thrown.
+		//
+		// |----------------------------------------------------|
+		// |                  T1 (Full Width)                   |
+		// |----------------------------------------------------|
+		// |    |    |                 T2                  |    |
+		// |    |----|-------------------------------------|----|
+		// |    |    | C1 |                           | C2 |    |
+		// |    |    |----|                           |----|    |
+		// |    |    |                                     |    |
+		// | L1 | L2 |           ChartArea (C0)            | R1 |
+		// |    |    |                                     |    |
+		// |    |    |----|                           |----|    |
+		// |    |    | C3 |                           | C4 |    |
+		// |    |----|-------------------------------------|----|
+		// |    |    |                 B1                  |    |
+		// |----------------------------------------------------|
+		// |                  B2 (Full Width)                   |
+		// |----------------------------------------------------|
+		//
+		// What we do to find the best sizing, we do the following
+		// 1. Determine the minimum size of the chart area.
+		// 2. Split the remaining width equally between each vertical axis
+		// 3. Split the remaining height equally between each horizontal axis
+		// 4. Give each layout the maximum size it can be. The layout will return it's minimum size
+		// 5. Adjust the sizes of each axis based on it's minimum reported size.
+		// 6. Refit each axis
+		// 7. Position each axis in the final location
+		// 8. Tell the chart the final location of the chart area
+		// 9. Tell any axes that overlay the chart area the positions of the chart area
+
+		// Step 1
+		var chartWidth = width - leftPadding - rightPadding;
+		var chartHeight = height - topPadding - bottomPadding;
+		var chartAreaWidth = chartWidth / 2; // min 50%
+
+		// Step 2
+		var verticalBoxWidth = (width - chartAreaWidth) / verticalBoxes.length;
+
+		// Step 3
+		// TODO re-limit horizontal axis height (this limit has affected only padding calculation since PR 1837)
+		// var horizontalBoxHeight = (height - chartAreaHeight) / horizontalBoxes.length;
+
+		// Step 4
+		var maxChartAreaWidth = chartWidth;
+		var maxChartAreaHeight = chartHeight;
+		var outerBoxSizes = {top: topPadding, left: leftPadding, bottom: bottomPadding, right: rightPadding};
+		var minBoxSizes = [];
+		var maxPadding;
+
+		function getMinimumBoxSize(box) {
+			var minSize;
+			var isHorizontal = box.isHorizontal();
+
+			if (isHorizontal) {
+				minSize = box.update(box.fullWidth ? chartWidth : maxChartAreaWidth, chartHeight / 2);
+				maxChartAreaHeight -= minSize.height;
+			} else {
+				minSize = box.update(verticalBoxWidth, maxChartAreaHeight);
+				maxChartAreaWidth -= minSize.width;
+			}
+
+			minBoxSizes.push({
+				horizontal: isHorizontal,
+				width: minSize.width,
+				box: box,
+			});
+		}
+
+		helpers$1.each(outerBoxes, getMinimumBoxSize);
+
+		// If a horizontal box has padding, we move the left boxes over to avoid ugly charts (see issue #2478)
+		maxPadding = findMaxPadding(outerBoxes);
+
+		// At this point, maxChartAreaHeight and maxChartAreaWidth are the size the chart area could
+		// be if the axes are drawn at their minimum sizes.
+		// Steps 5 & 6
+
+		// Function to fit a box
+		function fitBox(box) {
+			var minBoxSize = helpers$1.findNextWhere(minBoxSizes, function(minBox) {
+				return minBox.box === box;
+			});
+
+			if (minBoxSize) {
+				if (minBoxSize.horizontal) {
+					var scaleMargin = {
+						left: Math.max(outerBoxSizes.left, maxPadding.left),
+						right: Math.max(outerBoxSizes.right, maxPadding.right),
