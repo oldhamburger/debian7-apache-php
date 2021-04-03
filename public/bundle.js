@@ -74902,3 +74902,982 @@ function () {
   _proto.remove = function remove(rule) {
     this.unregister(rule);
     delete this.raw[rule.key];
+    this.index.splice(this.indexOf(rule), 1);
+  }
+  /**
+   * Get index of a rule.
+   */
+  ;
+
+  _proto.indexOf = function indexOf(rule) {
+    return this.index.indexOf(rule);
+  }
+  /**
+   * Run `onProcessRule()` plugins on every rule.
+   */
+  ;
+
+  _proto.process = function process() {
+    var plugins$$1 = this.options.jss.plugins; // We need to clone array because if we modify the index somewhere else during a loop
+    // we end up with very hard-to-track-down side effects.
+
+    this.index.slice(0).forEach(plugins$$1.onProcessRule, plugins$$1);
+  }
+  /**
+   * Register a rule in `.map` and `.classes` maps.
+   */
+  ;
+
+  _proto.register = function register(rule) {
+    this.map[rule.key] = rule;
+
+    if (rule instanceof StyleRule) {
+      this.map[rule.selector] = rule;
+      if (rule.id) this.classes[rule.key] = rule.id;
+    } else if (rule instanceof KeyframesRule && this.keyframes) {
+      this.keyframes[rule.name] = rule.id;
+    }
+  }
+  /**
+   * Unregister a rule.
+   */
+  ;
+
+  _proto.unregister = function unregister(rule) {
+    delete this.map[rule.key];
+
+    if (rule instanceof StyleRule) {
+      delete this.map[rule.selector];
+      delete this.classes[rule.key];
+    } else if (rule instanceof KeyframesRule) {
+      delete this.keyframes[rule.name];
+    }
+  }
+  /**
+   * Update the function values with a new data.
+   */
+  ;
+
+  _proto.update = function update() {
+    var name;
+    var data;
+    var options;
+
+    if (typeof (arguments.length <= 0 ? undefined : arguments[0]) === 'string') {
+      name = arguments.length <= 0 ? undefined : arguments[0]; // $FlowFixMe
+
+      data = arguments.length <= 1 ? undefined : arguments[1]; // $FlowFixMe
+
+      options = arguments.length <= 2 ? undefined : arguments[2];
+    } else {
+      data = arguments.length <= 0 ? undefined : arguments[0]; // $FlowFixMe
+
+      options = arguments.length <= 1 ? undefined : arguments[1];
+      name = null;
+    }
+
+    if (name) {
+      this.onUpdate(data, this.get(name), options);
+    } else {
+      for (var index = 0; index < this.index.length; index++) {
+        this.onUpdate(data, this.index[index], options);
+      }
+    }
+  }
+  /**
+   * Execute plugins, update rule props.
+   */
+  ;
+
+  _proto.onUpdate = function onUpdate(data, rule, options) {
+    if (options === void 0) {
+      options = defaultUpdateOptions;
+    }
+
+    var _this$options2 = this.options,
+        plugins$$1 = _this$options2.jss.plugins,
+        sheet = _this$options2.sheet; // It is a rules container like for e.g. ConditionalRule.
+
+    if (rule.rules instanceof RuleList) {
+      rule.rules.update(data, options);
+      return;
+    }
+
+    var styleRule = rule;
+    var style = styleRule.style;
+    plugins$$1.onUpdate(data, rule, sheet, options); // We rely on a new `style` ref in case it was mutated during onUpdate hook.
+
+    if (options.process && style && style !== styleRule.style) {
+      // We need to run the plugins in case new `style` relies on syntax plugins.
+      plugins$$1.onProcessStyle(styleRule.style, styleRule, sheet); // Update and add props.
+
+      for (var prop in styleRule.style) {
+        var nextValue = styleRule.style[prop];
+        var prevValue = style[prop]; // We need to use `force: true` because `rule.style` has been updated during onUpdate hook, so `rule.prop()` will not update the CSSOM rule.
+        // We do this comparison to avoid unneeded `rule.prop()` calls, since we have the old `style` object here.
+
+        if (nextValue !== prevValue) {
+          styleRule.prop(prop, nextValue, forceUpdateOptions);
+        }
+      } // Remove props.
+
+
+      for (var _prop in style) {
+        var _nextValue = styleRule.style[_prop];
+        var _prevValue = style[_prop]; // We need to use `force: true` because `rule.style` has been updated during onUpdate hook, so `rule.prop()` will not update the CSSOM rule.
+        // We do this comparison to avoid unneeded `rule.prop()` calls, since we have the old `style` object here.
+
+        if (_nextValue == null && _nextValue !== _prevValue) {
+          styleRule.prop(_prop, null, forceUpdateOptions);
+        }
+      }
+    }
+  }
+  /**
+   * Convert rules to a CSS string.
+   */
+  ;
+
+  _proto.toString = function toString(options) {
+    var str = '';
+    var sheet = this.options.sheet;
+    var link = sheet ? sheet.options.link : false;
+
+    for (var index = 0; index < this.index.length; index++) {
+      var rule = this.index[index];
+      var css = rule.toString(options); // No need to render an empty rule.
+
+      if (!css && !link) continue;
+      if (str) str += '\n';
+      str += css;
+    }
+
+    return str;
+  };
+
+  return RuleList;
+}();
+
+var StyleSheet =
+/*#__PURE__*/
+function () {
+  function StyleSheet(styles, options) {
+    this.options = void 0;
+    this.deployed = void 0;
+    this.attached = void 0;
+    this.rules = void 0;
+    this.renderer = void 0;
+    this.classes = void 0;
+    this.keyframes = void 0;
+    this.queue = void 0;
+    this.attached = false;
+    this.deployed = false;
+    this.classes = {};
+    this.keyframes = {};
+    this.options = Object(_babel_runtime_helpers_esm_extends__WEBPACK_IMPORTED_MODULE_0__["default"])({}, options, {
+      sheet: this,
+      parent: this,
+      classes: this.classes,
+      keyframes: this.keyframes
+    });
+
+    if (options.Renderer) {
+      this.renderer = new options.Renderer(this);
+    }
+
+    this.rules = new RuleList(this.options);
+
+    for (var name in styles) {
+      this.rules.add(name, styles[name]);
+    }
+
+    this.rules.process();
+  }
+  /**
+   * Attach renderable to the render tree.
+   */
+
+
+  var _proto = StyleSheet.prototype;
+
+  _proto.attach = function attach() {
+    if (this.attached) return this;
+    if (this.renderer) this.renderer.attach();
+    this.attached = true; // Order is important, because we can't use insertRule API if style element is not attached.
+
+    if (!this.deployed) this.deploy();
+    return this;
+  }
+  /**
+   * Remove renderable from render tree.
+   */
+  ;
+
+  _proto.detach = function detach() {
+    if (!this.attached) return this;
+    if (this.renderer) this.renderer.detach();
+    this.attached = false;
+    return this;
+  }
+  /**
+   * Add a rule to the current stylesheet.
+   * Will insert a rule also after the stylesheet has been rendered first time.
+   */
+  ;
+
+  _proto.addRule = function addRule(name, decl, options) {
+    var queue = this.queue; // Plugins can create rules.
+    // In order to preserve the right order, we need to queue all `.addRule` calls,
+    // which happen after the first `rules.add()` call.
+
+    if (this.attached && !queue) this.queue = [];
+    var rule = this.rules.add(name, decl, options);
+    if (!rule) return null;
+    this.options.jss.plugins.onProcessRule(rule);
+
+    if (this.attached) {
+      if (!this.deployed) return rule; // Don't insert rule directly if there is no stringified version yet.
+      // It will be inserted all together when .attach is called.
+
+      if (queue) queue.push(rule);else {
+        this.insertRule(rule);
+
+        if (this.queue) {
+          this.queue.forEach(this.insertRule, this);
+          this.queue = undefined;
+        }
+      }
+      return rule;
+    } // We can't add rules to a detached style node.
+    // We will redeploy the sheet once user will attach it.
+
+
+    this.deployed = false;
+    return rule;
+  }
+  /**
+   * Insert rule into the StyleSheet
+   */
+  ;
+
+  _proto.insertRule = function insertRule(rule) {
+    if (this.renderer) {
+      this.renderer.insertRule(rule);
+    }
+  }
+  /**
+   * Create and add rules.
+   * Will render also after Style Sheet was rendered the first time.
+   */
+  ;
+
+  _proto.addRules = function addRules(styles, options) {
+    var added = [];
+
+    for (var name in styles) {
+      var rule = this.addRule(name, styles[name], options);
+      if (rule) added.push(rule);
+    }
+
+    return added;
+  }
+  /**
+   * Get a rule by name.
+   */
+  ;
+
+  _proto.getRule = function getRule(name) {
+    return this.rules.get(name);
+  }
+  /**
+   * Delete a rule by name.
+   * Returns `true`: if rule has been deleted from the DOM.
+   */
+  ;
+
+  _proto.deleteRule = function deleteRule(name) {
+    var rule = this.rules.get(name);
+    if (!rule) return false;
+    this.rules.remove(rule);
+
+    if (this.attached && rule.renderable && this.renderer) {
+      return this.renderer.deleteRule(rule.renderable);
+    }
+
+    return true;
+  }
+  /**
+   * Get index of a rule.
+   */
+  ;
+
+  _proto.indexOf = function indexOf(rule) {
+    return this.rules.indexOf(rule);
+  }
+  /**
+   * Deploy pure CSS string to a renderable.
+   */
+  ;
+
+  _proto.deploy = function deploy() {
+    if (this.renderer) this.renderer.deploy();
+    this.deployed = true;
+    return this;
+  }
+  /**
+   * Update the function values with a new data.
+   */
+  ;
+
+  _proto.update = function update() {
+    var _this$rules;
+
+    (_this$rules = this.rules).update.apply(_this$rules, arguments);
+
+    return this;
+  }
+  /**
+   * Convert rules to a CSS string.
+   */
+  ;
+
+  _proto.toString = function toString(options) {
+    return this.rules.toString(options);
+  };
+
+  return StyleSheet;
+}();
+
+var PluginsRegistry =
+/*#__PURE__*/
+function () {
+  function PluginsRegistry() {
+    this.plugins = {
+      internal: [],
+      external: []
+    };
+    this.registry = void 0;
+  }
+
+  var _proto = PluginsRegistry.prototype;
+
+  /**
+   * Call `onCreateRule` hooks and return an object if returned by a hook.
+   */
+  _proto.onCreateRule = function onCreateRule(name, decl, options) {
+    for (var i = 0; i < this.registry.onCreateRule.length; i++) {
+      var rule = this.registry.onCreateRule[i](name, decl, options);
+      if (rule) return rule;
+    }
+
+    return null;
+  }
+  /**
+   * Call `onProcessRule` hooks.
+   */
+  ;
+
+  _proto.onProcessRule = function onProcessRule(rule) {
+    if (rule.isProcessed) return;
+    var sheet = rule.options.sheet;
+
+    for (var i = 0; i < this.registry.onProcessRule.length; i++) {
+      this.registry.onProcessRule[i](rule, sheet);
+    } // $FlowFixMe
+
+
+    if (rule.style) this.onProcessStyle(rule.style, rule, sheet);
+    rule.isProcessed = true;
+  }
+  /**
+   * Call `onProcessStyle` hooks.
+   */
+  ;
+
+  _proto.onProcessStyle = function onProcessStyle(style, rule, sheet) {
+    for (var i = 0; i < this.registry.onProcessStyle.length; i++) {
+      // $FlowFixMe
+      rule.style = this.registry.onProcessStyle[i](rule.style, rule, sheet);
+    }
+  }
+  /**
+   * Call `onProcessSheet` hooks.
+   */
+  ;
+
+  _proto.onProcessSheet = function onProcessSheet(sheet) {
+    for (var i = 0; i < this.registry.onProcessSheet.length; i++) {
+      this.registry.onProcessSheet[i](sheet);
+    }
+  }
+  /**
+   * Call `onUpdate` hooks.
+   */
+  ;
+
+  _proto.onUpdate = function onUpdate(data, rule, sheet, options) {
+    for (var i = 0; i < this.registry.onUpdate.length; i++) {
+      this.registry.onUpdate[i](data, rule, sheet, options);
+    }
+  }
+  /**
+   * Call `onChangeValue` hooks.
+   */
+  ;
+
+  _proto.onChangeValue = function onChangeValue(value, prop, rule) {
+    var processedValue = value;
+
+    for (var i = 0; i < this.registry.onChangeValue.length; i++) {
+      processedValue = this.registry.onChangeValue[i](processedValue, prop, rule);
+    }
+
+    return processedValue;
+  }
+  /**
+   * Register a plugin.
+   */
+  ;
+
+  _proto.use = function use(newPlugin, options) {
+    if (options === void 0) {
+      options = {
+        queue: 'external'
+      };
+    }
+
+    var plugins = this.plugins[options.queue]; // Avoids applying same plugin twice, at least based on ref.
+
+    if (plugins.indexOf(newPlugin) !== -1) {
+      return;
+    }
+
+    plugins.push(newPlugin);
+    this.registry = [].concat(this.plugins.external, this.plugins.internal).reduce(function (registry, plugin) {
+      for (var name in plugin) {
+        if (name in registry) {
+          registry[name].push(plugin[name]);
+        } else {
+           true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, "[JSS] Unknown hook \"" + name + "\".") : undefined;
+        }
+      }
+
+      return registry;
+    }, {
+      onCreateRule: [],
+      onProcessRule: [],
+      onProcessStyle: [],
+      onProcessSheet: [],
+      onChangeValue: [],
+      onUpdate: []
+    });
+  };
+
+  return PluginsRegistry;
+}();
+
+/**
+ * Sheets registry to access them all at one place.
+ */
+var SheetsRegistry =
+/*#__PURE__*/
+function () {
+  function SheetsRegistry() {
+    this.registry = [];
+  }
+
+  var _proto = SheetsRegistry.prototype;
+
+  /**
+   * Register a Style Sheet.
+   */
+  _proto.add = function add(sheet) {
+    var registry = this.registry;
+    var index = sheet.options.index;
+    if (registry.indexOf(sheet) !== -1) return;
+
+    if (registry.length === 0 || index >= this.index) {
+      registry.push(sheet);
+      return;
+    } // Find a position.
+
+
+    for (var i = 0; i < registry.length; i++) {
+      if (registry[i].options.index > index) {
+        registry.splice(i, 0, sheet);
+        return;
+      }
+    }
+  }
+  /**
+   * Reset the registry.
+   */
+  ;
+
+  _proto.reset = function reset() {
+    this.registry = [];
+  }
+  /**
+   * Remove a Style Sheet.
+   */
+  ;
+
+  _proto.remove = function remove(sheet) {
+    var index = this.registry.indexOf(sheet);
+    this.registry.splice(index, 1);
+  }
+  /**
+   * Convert all attached sheets to a CSS string.
+   */
+  ;
+
+  _proto.toString = function toString(options) {
+    return this.registry.filter(function (sheet) {
+      return sheet.attached;
+    }).map(function (sheet) {
+      return sheet.toString(options);
+    }).join('\n');
+  };
+
+  Object(_babel_runtime_helpers_esm_createClass__WEBPACK_IMPORTED_MODULE_3__["default"])(SheetsRegistry, [{
+    key: "index",
+
+    /**
+     * Current highest index number.
+     */
+    get: function get() {
+      return this.registry.length === 0 ? 0 : this.registry[this.registry.length - 1].options.index;
+    }
+  }]);
+
+  return SheetsRegistry;
+}();
+
+/**
+ * This is a global sheets registry. Only DomRenderer will add sheets to it.
+ * On the server one should use an own SheetsRegistry instance and add the
+ * sheets to it, because you need to make sure to create a new registry for
+ * each request in order to not leak sheets across requests.
+ */
+
+var sheets = new SheetsRegistry();
+
+var global$1 = (typeof global !== "undefined" ? global :
+            typeof self !== "undefined" ? self :
+            typeof window !== "undefined" ? window : {});
+
+var ns = '2f1acc6c3a606b082e5eef5e54414ffb';
+if (global$1[ns] == null) global$1[ns] = 0; // Bundle may contain multiple JSS versions at the same time. In order to identify
+// the current version with just one short number and use it for classes generation
+// we use a counter. Also it is more accurate, because user can manually reevaluate
+// the module.
+
+var moduleId = global$1[ns]++;
+
+var maxRules = 1e10;
+/**
+ * Returns a function which generates unique class names based on counters.
+ * When new generator function is created, rule counter is reseted.
+ * We need to reset the rule counter for SSR for each request.
+ */
+
+var createGenerateIdDefault = (function () {
+  var ruleCounter = 0;
+  var env = "development";
+  var defaultPrefix = env === 'production' ? 'c' : '';
+  return function (rule, sheet) {
+    ruleCounter += 1;
+
+    if (ruleCounter > maxRules) {
+       true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, "[JSS] You might have a memory leak. Rule counter is at " + ruleCounter + ".") : undefined;
+    }
+
+    var prefix = defaultPrefix;
+    var jssId = '';
+
+    if (sheet) {
+      prefix = sheet.options.classNamePrefix || defaultPrefix;
+      if (sheet.options.jss.id != null) jssId += sheet.options.jss.id;
+    }
+
+    if (env === 'production') {
+      return "" + prefix + moduleId + jssId + ruleCounter;
+    }
+
+    return prefix + rule.key + "-" + moduleId + (jssId && "-" + jssId) + "-" + ruleCounter;
+  };
+});
+
+/**
+ * Cache the value from the first time a function is called.
+ */
+var memoize = function memoize(fn) {
+  var value;
+  return function () {
+    if (!value) value = fn();
+    return value;
+  };
+};
+/**
+ * Get a style property value.
+ */
+
+
+function getPropertyValue(cssRule, prop) {
+  try {
+    // Support CSSTOM.
+    if (cssRule.attributeStyleMap) {
+      return cssRule.attributeStyleMap.get(prop);
+    }
+
+    return cssRule.style.getPropertyValue(prop);
+  } catch (err) {
+    // IE may throw if property is unknown.
+    return '';
+  }
+}
+/**
+ * Set a style property.
+ */
+
+
+function setProperty(cssRule, prop, value) {
+  try {
+    var cssValue = value;
+
+    if (Array.isArray(value)) {
+      cssValue = toCssValue(value, true);
+
+      if (value[value.length - 1] === '!important') {
+        cssRule.style.setProperty(prop, cssValue, 'important');
+        return true;
+      }
+    } // Support CSSTOM.
+
+
+    if (cssRule.attributeStyleMap) {
+      cssRule.attributeStyleMap.set(prop, cssValue);
+    } else {
+      cssRule.style.setProperty(prop, cssValue);
+    }
+  } catch (err) {
+    // IE may throw if property is unknown.
+    return false;
+  }
+
+  return true;
+}
+/**
+ * Remove a style property.
+ */
+
+
+function removeProperty(cssRule, prop) {
+  try {
+    // Support CSSTOM.
+    if (cssRule.attributeStyleMap) {
+      cssRule.attributeStyleMap.delete(prop);
+    } else {
+      cssRule.style.removeProperty(prop);
+    }
+  } catch (err) {
+     true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, "[JSS] DOMException \"" + err.message + "\" was thrown. Tried to remove property \"" + prop + "\".") : undefined;
+  }
+}
+/**
+ * Set the selector.
+ */
+
+
+function setSelector(cssRule, selectorText) {
+  cssRule.selectorText = selectorText; // Return false if setter was not successful.
+  // Currently works in chrome only.
+
+  return cssRule.selectorText === selectorText;
+}
+/**
+ * Gets the `head` element upon the first call and caches it.
+ * We assume it can't be null.
+ */
+
+
+var getHead = memoize(function () {
+  return document.querySelector('head');
+});
+/**
+ * Find attached sheet with an index higher than the passed one.
+ */
+
+function findHigherSheet(registry, options) {
+  for (var i = 0; i < registry.length; i++) {
+    var sheet = registry[i];
+
+    if (sheet.attached && sheet.options.index > options.index && sheet.options.insertionPoint === options.insertionPoint) {
+      return sheet;
+    }
+  }
+
+  return null;
+}
+/**
+ * Find attached sheet with the highest index.
+ */
+
+
+function findHighestSheet(registry, options) {
+  for (var i = registry.length - 1; i >= 0; i--) {
+    var sheet = registry[i];
+
+    if (sheet.attached && sheet.options.insertionPoint === options.insertionPoint) {
+      return sheet;
+    }
+  }
+
+  return null;
+}
+/**
+ * Find a comment with "jss" inside.
+ */
+
+
+function findCommentNode(text) {
+  var head = getHead();
+
+  for (var i = 0; i < head.childNodes.length; i++) {
+    var node = head.childNodes[i];
+
+    if (node.nodeType === 8 && node.nodeValue.trim() === text) {
+      return node;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find a node before which we can insert the sheet.
+ */
+function findPrevNode(options) {
+  var registry = sheets.registry;
+
+  if (registry.length > 0) {
+    // Try to insert before the next higher sheet.
+    var sheet = findHigherSheet(registry, options);
+
+    if (sheet && sheet.renderer) {
+      return {
+        parent: sheet.renderer.element.parentNode,
+        node: sheet.renderer.element
+      };
+    } // Otherwise insert after the last attached.
+
+
+    sheet = findHighestSheet(registry, options);
+
+    if (sheet && sheet.renderer) {
+      return {
+        parent: sheet.renderer.element.parentNode,
+        node: sheet.renderer.element.nextSibling
+      };
+    }
+  } // Try to find a comment placeholder if registry is empty.
+
+
+  var insertionPoint = options.insertionPoint;
+
+  if (insertionPoint && typeof insertionPoint === 'string') {
+    var comment = findCommentNode(insertionPoint);
+
+    if (comment) {
+      return {
+        parent: comment.parentNode,
+        node: comment.nextSibling
+      };
+    } // If user specifies an insertion point and it can't be found in the document -
+    // bad specificity issues may appear.
+
+
+     true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, "[JSS] Insertion point \"" + insertionPoint + "\" not found.") : undefined;
+  }
+
+  return false;
+}
+/**
+ * Insert style element into the DOM.
+ */
+
+
+function insertStyle(style, options) {
+  var insertionPoint = options.insertionPoint;
+  var nextNode = findPrevNode(options);
+
+  if (nextNode !== false && nextNode.parent) {
+    nextNode.parent.insertBefore(style, nextNode.node);
+    return;
+  } // Works with iframes and any node types.
+
+
+  if (insertionPoint && typeof insertionPoint.nodeType === 'number') {
+    // https://stackoverflow.com/questions/41328728/force-casting-in-flow
+    var insertionPointElement = insertionPoint;
+    var parentNode = insertionPointElement.parentNode;
+    if (parentNode) parentNode.insertBefore(style, insertionPointElement.nextSibling);else  true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, '[JSS] Insertion point is not in the DOM.') : undefined;
+    return;
+  }
+
+  getHead().appendChild(style);
+}
+/**
+ * Read jss nonce setting from the page if the user has set it.
+ */
+
+
+var getNonce = memoize(function () {
+  var node = document.querySelector('meta[property="csp-nonce"]');
+  return node ? node.getAttribute('content') : null;
+});
+
+var _insertRule = function insertRule(container, rule, index) {
+  if (index === void 0) {
+    index = container.cssRules.length;
+  }
+
+  try {
+    if ('insertRule' in container) {
+      var c = container;
+      c.insertRule(rule, index);
+    } // Keyframes rule.
+    else if ('appendRule' in container) {
+        var _c = container;
+
+        _c.appendRule(rule);
+      }
+  } catch (err) {
+     true ? Object(tiny_warning__WEBPACK_IMPORTED_MODULE_2__["default"])(false, "[JSS] Can not insert an unsupported rule \n" + rule) : undefined;
+    return false;
+  }
+
+  return container.cssRules[index];
+};
+
+var createStyle = function createStyle() {
+  var el = document.createElement('style'); // Without it, IE will have a broken source order specificity if we
+  // insert rules after we insert the style tag.
+  // It seems to kick-off the source order specificity algorithm.
+
+  el.textContent = '\n';
+  return el;
+};
+
+var DomRenderer =
+/*#__PURE__*/
+function () {
+  // HTMLStyleElement needs fixing https://github.com/facebook/flow/issues/2696
+  function DomRenderer(sheet) {
+    this.getPropertyValue = getPropertyValue;
+    this.setProperty = setProperty;
+    this.removeProperty = removeProperty;
+    this.setSelector = setSelector;
+    this.element = void 0;
+    this.sheet = void 0;
+    this.hasInsertedRules = false;
+    // There is no sheet when the renderer is used from a standalone StyleRule.
+    if (sheet) sheets.add(sheet);
+    this.sheet = sheet;
+
+    var _ref = this.sheet ? this.sheet.options : {},
+        media = _ref.media,
+        meta = _ref.meta,
+        element = _ref.element;
+
+    this.element = element || createStyle();
+    this.element.setAttribute('data-jss', '');
+    if (media) this.element.setAttribute('media', media);
+    if (meta) this.element.setAttribute('data-meta', meta);
+    var nonce = getNonce();
+    if (nonce) this.element.setAttribute('nonce', nonce);
+  }
+  /**
+   * Insert style element into render tree.
+   */
+
+
+  var _proto = DomRenderer.prototype;
+
+  _proto.attach = function attach() {
+    // In the case the element node is external and it is already in the DOM.
+    if (this.element.parentNode || !this.sheet) return;
+    insertStyle(this.element, this.sheet.options); // When rules are inserted using `insertRule` API, after `sheet.detach().attach()`
+    // browsers remove those rules.
+    // TODO figure out if its a bug and if it is known.
+    // Workaround is to redeploy the sheet.
+
+    if (this.hasInsertedRules) {
+      this.hasInsertedRules = false;
+      this.deploy();
+    }
+  }
+  /**
+   * Remove style element from render tree.
+   */
+  ;
+
+  _proto.detach = function detach() {
+    this.element.parentNode.removeChild(this.element);
+  }
+  /**
+   * Inject CSS string into element.
+   */
+  ;
+
+  _proto.deploy = function deploy() {
+    var sheet = this.sheet;
+    if (!sheet) return;
+
+    if (sheet.options.link) {
+      this.insertRules(sheet.rules);
+      return;
+    }
+
+    this.element.textContent = "\n" + sheet.toString() + "\n";
+  }
+  /**
+   * Insert RuleList into an element.
+   */
+  ;
+
+  _proto.insertRules = function insertRules(rules, nativeParent) {
+    for (var i = 0; i < rules.index.length; i++) {
+      this.insertRule(rules.index[i], i, nativeParent);
+    }
+  }
+  /**
+   * Insert a rule into element.
+   */
+  ;
+
+  _proto.insertRule = function insertRule(rule, index, nativeParent) {
+    if (nativeParent === void 0) {
+      nativeParent = this.element.sheet;
+    }
+
+    if (rule.rules) {
+      var parent = rule;
+      var latestNativeParent = nativeParent;
+
+      if (rule.type === 'conditional' || rule.type === 'keyframes') {
+        // We need to render the container without children first.
+        latestNativeParent = _insertRule(nativeParent, parent.toString({
+          children: false
+        }), index);
+
+        if (latestNativeParent === false) {
+          return false;
+        }
+      }
+
+      this.insertRules(parent.rules, latestNativeParent);
+      return latestNativeParent;
+    }
+
+    var ruleStr = rule.toString();
