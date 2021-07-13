@@ -89751,3 +89751,1015 @@ webpackContext.id = "./node_modules/moment/locale sync recursive ^\\.\\/.*$";
 
 ;(function (global, factory) {
     true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var arKw = moment.defineLocale('ar-kw', {
+        months : 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        monthsShort : 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        weekdays : 'الأحد_الإتنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort : 'احد_اتنين_ثلاثاء_اربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin : 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay: '[اليوم على الساعة] LT',
+            nextDay: '[غدا على الساعة] LT',
+            nextWeek: 'dddd [على الساعة] LT',
+            lastDay: '[أمس على الساعة] LT',
+            lastWeek: 'dddd [على الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'في %s',
+            past : 'منذ %s',
+            s : 'ثوان',
+            ss : '%d ثانية',
+            m : 'دقيقة',
+            mm : '%d دقائق',
+            h : 'ساعة',
+            hh : '%d ساعات',
+            d : 'يوم',
+            dd : '%d أيام',
+            M : 'شهر',
+            MM : '%d أشهر',
+            y : 'سنة',
+            yy : '%d سنوات'
+        },
+        week : {
+            dow : 0, // Sunday is the first day of the week.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
+        }
+    });
+
+    return arKw;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/ar-ly.js":
+/*!*********************************************!*\
+  !*** ./node_modules/moment/locale/ar-ly.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var symbolMap = {
+        '1': '1',
+        '2': '2',
+        '3': '3',
+        '4': '4',
+        '5': '5',
+        '6': '6',
+        '7': '7',
+        '8': '8',
+        '9': '9',
+        '0': '0'
+    }, pluralForm = function (n) {
+        return n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5;
+    }, plurals = {
+        s : ['أقل من ثانية', 'ثانية واحدة', ['ثانيتان', 'ثانيتين'], '%d ثوان', '%d ثانية', '%d ثانية'],
+        m : ['أقل من دقيقة', 'دقيقة واحدة', ['دقيقتان', 'دقيقتين'], '%d دقائق', '%d دقيقة', '%d دقيقة'],
+        h : ['أقل من ساعة', 'ساعة واحدة', ['ساعتان', 'ساعتين'], '%d ساعات', '%d ساعة', '%d ساعة'],
+        d : ['أقل من يوم', 'يوم واحد', ['يومان', 'يومين'], '%d أيام', '%d يومًا', '%d يوم'],
+        M : ['أقل من شهر', 'شهر واحد', ['شهران', 'شهرين'], '%d أشهر', '%d شهرا', '%d شهر'],
+        y : ['أقل من عام', 'عام واحد', ['عامان', 'عامين'], '%d أعوام', '%d عامًا', '%d عام']
+    }, pluralize = function (u) {
+        return function (number, withoutSuffix, string, isFuture) {
+            var f = pluralForm(number),
+                str = plurals[u][pluralForm(number)];
+            if (f === 2) {
+                str = str[withoutSuffix ? 0 : 1];
+            }
+            return str.replace(/%d/i, number);
+        };
+    }, months = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر'
+    ];
+
+    var arLy = moment.defineLocale('ar-ly', {
+        months : months,
+        monthsShort : months,
+        weekdays : 'الأحد_الإثنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort : 'أحد_إثنين_ثلاثاء_أربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin : 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'D/\u200FM/\u200FYYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /ص|م/,
+        isPM : function (input) {
+            return 'م' === input;
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 12) {
+                return 'ص';
+            } else {
+                return 'م';
+            }
+        },
+        calendar : {
+            sameDay: '[اليوم عند الساعة] LT',
+            nextDay: '[غدًا عند الساعة] LT',
+            nextWeek: 'dddd [عند الساعة] LT',
+            lastDay: '[أمس عند الساعة] LT',
+            lastWeek: 'dddd [عند الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'بعد %s',
+            past : 'منذ %s',
+            s : pluralize('s'),
+            ss : pluralize('s'),
+            m : pluralize('m'),
+            mm : pluralize('m'),
+            h : pluralize('h'),
+            hh : pluralize('h'),
+            d : pluralize('d'),
+            dd : pluralize('d'),
+            M : pluralize('M'),
+            MM : pluralize('M'),
+            y : pluralize('y'),
+            yy : pluralize('y')
+        },
+        preparse: function (string) {
+            return string.replace(/،/g, ',');
+        },
+        postformat: function (string) {
+            return string.replace(/\d/g, function (match) {
+                return symbolMap[match];
+            }).replace(/,/g, '،');
+        },
+        week : {
+            dow : 6, // Saturday is the first day of the week.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
+        }
+    });
+
+    return arLy;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/ar-ma.js":
+/*!*********************************************!*\
+  !*** ./node_modules/moment/locale/ar-ma.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var arMa = moment.defineLocale('ar-ma', {
+        months : 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        monthsShort : 'يناير_فبراير_مارس_أبريل_ماي_يونيو_يوليوز_غشت_شتنبر_أكتوبر_نونبر_دجنبر'.split('_'),
+        weekdays : 'الأحد_الإتنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort : 'احد_اتنين_ثلاثاء_اربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin : 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay: '[اليوم على الساعة] LT',
+            nextDay: '[غدا على الساعة] LT',
+            nextWeek: 'dddd [على الساعة] LT',
+            lastDay: '[أمس على الساعة] LT',
+            lastWeek: 'dddd [على الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'في %s',
+            past : 'منذ %s',
+            s : 'ثوان',
+            ss : '%d ثانية',
+            m : 'دقيقة',
+            mm : '%d دقائق',
+            h : 'ساعة',
+            hh : '%d ساعات',
+            d : 'يوم',
+            dd : '%d أيام',
+            M : 'شهر',
+            MM : '%d أشهر',
+            y : 'سنة',
+            yy : '%d سنوات'
+        },
+        week : {
+            dow : 6, // Saturday is the first day of the week.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
+        }
+    });
+
+    return arMa;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/ar-sa.js":
+/*!*********************************************!*\
+  !*** ./node_modules/moment/locale/ar-sa.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var symbolMap = {
+        '1': '١',
+        '2': '٢',
+        '3': '٣',
+        '4': '٤',
+        '5': '٥',
+        '6': '٦',
+        '7': '٧',
+        '8': '٨',
+        '9': '٩',
+        '0': '٠'
+    }, numberMap = {
+        '١': '1',
+        '٢': '2',
+        '٣': '3',
+        '٤': '4',
+        '٥': '5',
+        '٦': '6',
+        '٧': '7',
+        '٨': '8',
+        '٩': '9',
+        '٠': '0'
+    };
+
+    var arSa = moment.defineLocale('ar-sa', {
+        months : 'يناير_فبراير_مارس_أبريل_مايو_يونيو_يوليو_أغسطس_سبتمبر_أكتوبر_نوفمبر_ديسمبر'.split('_'),
+        monthsShort : 'يناير_فبراير_مارس_أبريل_مايو_يونيو_يوليو_أغسطس_سبتمبر_أكتوبر_نوفمبر_ديسمبر'.split('_'),
+        weekdays : 'الأحد_الإثنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort : 'أحد_إثنين_ثلاثاء_أربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin : 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /ص|م/,
+        isPM : function (input) {
+            return 'م' === input;
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 12) {
+                return 'ص';
+            } else {
+                return 'م';
+            }
+        },
+        calendar : {
+            sameDay: '[اليوم على الساعة] LT',
+            nextDay: '[غدا على الساعة] LT',
+            nextWeek: 'dddd [على الساعة] LT',
+            lastDay: '[أمس على الساعة] LT',
+            lastWeek: 'dddd [على الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'في %s',
+            past : 'منذ %s',
+            s : 'ثوان',
+            ss : '%d ثانية',
+            m : 'دقيقة',
+            mm : '%d دقائق',
+            h : 'ساعة',
+            hh : '%d ساعات',
+            d : 'يوم',
+            dd : '%d أيام',
+            M : 'شهر',
+            MM : '%d أشهر',
+            y : 'سنة',
+            yy : '%d سنوات'
+        },
+        preparse: function (string) {
+            return string.replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
+                return numberMap[match];
+            }).replace(/،/g, ',');
+        },
+        postformat: function (string) {
+            return string.replace(/\d/g, function (match) {
+                return symbolMap[match];
+            }).replace(/,/g, '،');
+        },
+        week : {
+            dow : 0, // Sunday is the first day of the week.
+            doy : 6  // The week that contains Jan 6th is the first week of the year.
+        }
+    });
+
+    return arSa;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/ar-tn.js":
+/*!*********************************************!*\
+  !*** ./node_modules/moment/locale/ar-tn.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var arTn = moment.defineLocale('ar-tn', {
+        months: 'جانفي_فيفري_مارس_أفريل_ماي_جوان_جويلية_أوت_سبتمبر_أكتوبر_نوفمبر_ديسمبر'.split('_'),
+        monthsShort: 'جانفي_فيفري_مارس_أفريل_ماي_جوان_جويلية_أوت_سبتمبر_أكتوبر_نوفمبر_ديسمبر'.split('_'),
+        weekdays: 'الأحد_الإثنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort: 'أحد_إثنين_ثلاثاء_أربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin: 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat: {
+            LT: 'HH:mm',
+            LTS: 'HH:mm:ss',
+            L: 'DD/MM/YYYY',
+            LL: 'D MMMM YYYY',
+            LLL: 'D MMMM YYYY HH:mm',
+            LLLL: 'dddd D MMMM YYYY HH:mm'
+        },
+        calendar: {
+            sameDay: '[اليوم على الساعة] LT',
+            nextDay: '[غدا على الساعة] LT',
+            nextWeek: 'dddd [على الساعة] LT',
+            lastDay: '[أمس على الساعة] LT',
+            lastWeek: 'dddd [على الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime: {
+            future: 'في %s',
+            past: 'منذ %s',
+            s: 'ثوان',
+            ss : '%d ثانية',
+            m: 'دقيقة',
+            mm: '%d دقائق',
+            h: 'ساعة',
+            hh: '%d ساعات',
+            d: 'يوم',
+            dd: '%d أيام',
+            M: 'شهر',
+            MM: '%d أشهر',
+            y: 'سنة',
+            yy: '%d سنوات'
+        },
+        week: {
+            dow: 1, // Monday is the first day of the week.
+            doy: 4 // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return arTn;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/ar.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/ar.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var symbolMap = {
+        '1': '١',
+        '2': '٢',
+        '3': '٣',
+        '4': '٤',
+        '5': '٥',
+        '6': '٦',
+        '7': '٧',
+        '8': '٨',
+        '9': '٩',
+        '0': '٠'
+    }, numberMap = {
+        '١': '1',
+        '٢': '2',
+        '٣': '3',
+        '٤': '4',
+        '٥': '5',
+        '٦': '6',
+        '٧': '7',
+        '٨': '8',
+        '٩': '9',
+        '٠': '0'
+    }, pluralForm = function (n) {
+        return n === 0 ? 0 : n === 1 ? 1 : n === 2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5;
+    }, plurals = {
+        s : ['أقل من ثانية', 'ثانية واحدة', ['ثانيتان', 'ثانيتين'], '%d ثوان', '%d ثانية', '%d ثانية'],
+        m : ['أقل من دقيقة', 'دقيقة واحدة', ['دقيقتان', 'دقيقتين'], '%d دقائق', '%d دقيقة', '%d دقيقة'],
+        h : ['أقل من ساعة', 'ساعة واحدة', ['ساعتان', 'ساعتين'], '%d ساعات', '%d ساعة', '%d ساعة'],
+        d : ['أقل من يوم', 'يوم واحد', ['يومان', 'يومين'], '%d أيام', '%d يومًا', '%d يوم'],
+        M : ['أقل من شهر', 'شهر واحد', ['شهران', 'شهرين'], '%d أشهر', '%d شهرا', '%d شهر'],
+        y : ['أقل من عام', 'عام واحد', ['عامان', 'عامين'], '%d أعوام', '%d عامًا', '%d عام']
+    }, pluralize = function (u) {
+        return function (number, withoutSuffix, string, isFuture) {
+            var f = pluralForm(number),
+                str = plurals[u][pluralForm(number)];
+            if (f === 2) {
+                str = str[withoutSuffix ? 0 : 1];
+            }
+            return str.replace(/%d/i, number);
+        };
+    }, months = [
+        'يناير',
+        'فبراير',
+        'مارس',
+        'أبريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'أغسطس',
+        'سبتمبر',
+        'أكتوبر',
+        'نوفمبر',
+        'ديسمبر'
+    ];
+
+    var ar = moment.defineLocale('ar', {
+        months : months,
+        monthsShort : months,
+        weekdays : 'الأحد_الإثنين_الثلاثاء_الأربعاء_الخميس_الجمعة_السبت'.split('_'),
+        weekdaysShort : 'أحد_إثنين_ثلاثاء_أربعاء_خميس_جمعة_سبت'.split('_'),
+        weekdaysMin : 'ح_ن_ث_ر_خ_ج_س'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'D/\u200FM/\u200FYYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd D MMMM YYYY HH:mm'
+        },
+        meridiemParse: /ص|م/,
+        isPM : function (input) {
+            return 'م' === input;
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 12) {
+                return 'ص';
+            } else {
+                return 'م';
+            }
+        },
+        calendar : {
+            sameDay: '[اليوم عند الساعة] LT',
+            nextDay: '[غدًا عند الساعة] LT',
+            nextWeek: 'dddd [عند الساعة] LT',
+            lastDay: '[أمس عند الساعة] LT',
+            lastWeek: 'dddd [عند الساعة] LT',
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'بعد %s',
+            past : 'منذ %s',
+            s : pluralize('s'),
+            ss : pluralize('s'),
+            m : pluralize('m'),
+            mm : pluralize('m'),
+            h : pluralize('h'),
+            hh : pluralize('h'),
+            d : pluralize('d'),
+            dd : pluralize('d'),
+            M : pluralize('M'),
+            MM : pluralize('M'),
+            y : pluralize('y'),
+            yy : pluralize('y')
+        },
+        preparse: function (string) {
+            return string.replace(/[١٢٣٤٥٦٧٨٩٠]/g, function (match) {
+                return numberMap[match];
+            }).replace(/،/g, ',');
+        },
+        postformat: function (string) {
+            return string.replace(/\d/g, function (match) {
+                return symbolMap[match];
+            }).replace(/,/g, '،');
+        },
+        week : {
+            dow : 6, // Saturday is the first day of the week.
+            doy : 12  // The week that contains Jan 12th is the first week of the year.
+        }
+    });
+
+    return ar;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/az.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/az.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var suffixes = {
+        1: '-inci',
+        5: '-inci',
+        8: '-inci',
+        70: '-inci',
+        80: '-inci',
+        2: '-nci',
+        7: '-nci',
+        20: '-nci',
+        50: '-nci',
+        3: '-üncü',
+        4: '-üncü',
+        100: '-üncü',
+        6: '-ncı',
+        9: '-uncu',
+        10: '-uncu',
+        30: '-uncu',
+        60: '-ıncı',
+        90: '-ıncı'
+    };
+
+    var az = moment.defineLocale('az', {
+        months : 'yanvar_fevral_mart_aprel_may_iyun_iyul_avqust_sentyabr_oktyabr_noyabr_dekabr'.split('_'),
+        monthsShort : 'yan_fev_mar_apr_may_iyn_iyl_avq_sen_okt_noy_dek'.split('_'),
+        weekdays : 'Bazar_Bazar ertəsi_Çərşənbə axşamı_Çərşənbə_Cümə axşamı_Cümə_Şənbə'.split('_'),
+        weekdaysShort : 'Baz_BzE_ÇAx_Çər_CAx_Cüm_Şən'.split('_'),
+        weekdaysMin : 'Bz_BE_ÇA_Çə_CA_Cü_Şə'.split('_'),
+        weekdaysParseExact : true,
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD.MM.YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY HH:mm',
+            LLLL : 'dddd, D MMMM YYYY HH:mm'
+        },
+        calendar : {
+            sameDay : '[bugün saat] LT',
+            nextDay : '[sabah saat] LT',
+            nextWeek : '[gələn həftə] dddd [saat] LT',
+            lastDay : '[dünən] LT',
+            lastWeek : '[keçən həftə] dddd [saat] LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : '%s sonra',
+            past : '%s əvvəl',
+            s : 'birneçə saniyə',
+            ss : '%d saniyə',
+            m : 'bir dəqiqə',
+            mm : '%d dəqiqə',
+            h : 'bir saat',
+            hh : '%d saat',
+            d : 'bir gün',
+            dd : '%d gün',
+            M : 'bir ay',
+            MM : '%d ay',
+            y : 'bir il',
+            yy : '%d il'
+        },
+        meridiemParse: /gecə|səhər|gündüz|axşam/,
+        isPM : function (input) {
+            return /^(gündüz|axşam)$/.test(input);
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 4) {
+                return 'gecə';
+            } else if (hour < 12) {
+                return 'səhər';
+            } else if (hour < 17) {
+                return 'gündüz';
+            } else {
+                return 'axşam';
+            }
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}-(ıncı|inci|nci|üncü|ncı|uncu)/,
+        ordinal : function (number) {
+            if (number === 0) {  // special case for zero
+                return number + '-ıncı';
+            }
+            var a = number % 10,
+                b = number % 100 - a,
+                c = number >= 100 ? 100 : null;
+            return number + (suffixes[a] || suffixes[b] || suffixes[c]);
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
+        }
+    });
+
+    return az;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/be.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/be.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    function plural(word, num) {
+        var forms = word.split('_');
+        return num % 10 === 1 && num % 100 !== 11 ? forms[0] : (num % 10 >= 2 && num % 10 <= 4 && (num % 100 < 10 || num % 100 >= 20) ? forms[1] : forms[2]);
+    }
+    function relativeTimeWithPlural(number, withoutSuffix, key) {
+        var format = {
+            'ss': withoutSuffix ? 'секунда_секунды_секунд' : 'секунду_секунды_секунд',
+            'mm': withoutSuffix ? 'хвіліна_хвіліны_хвілін' : 'хвіліну_хвіліны_хвілін',
+            'hh': withoutSuffix ? 'гадзіна_гадзіны_гадзін' : 'гадзіну_гадзіны_гадзін',
+            'dd': 'дзень_дні_дзён',
+            'MM': 'месяц_месяцы_месяцаў',
+            'yy': 'год_гады_гадоў'
+        };
+        if (key === 'm') {
+            return withoutSuffix ? 'хвіліна' : 'хвіліну';
+        }
+        else if (key === 'h') {
+            return withoutSuffix ? 'гадзіна' : 'гадзіну';
+        }
+        else {
+            return number + ' ' + plural(format[key], +number);
+        }
+    }
+
+    var be = moment.defineLocale('be', {
+        months : {
+            format: 'студзеня_лютага_сакавіка_красавіка_траўня_чэрвеня_ліпеня_жніўня_верасня_кастрычніка_лістапада_снежня'.split('_'),
+            standalone: 'студзень_люты_сакавік_красавік_травень_чэрвень_ліпень_жнівень_верасень_кастрычнік_лістапад_снежань'.split('_')
+        },
+        monthsShort : 'студ_лют_сак_крас_трав_чэрв_ліп_жнів_вер_каст_ліст_снеж'.split('_'),
+        weekdays : {
+            format: 'нядзелю_панядзелак_аўторак_сераду_чацвер_пятніцу_суботу'.split('_'),
+            standalone: 'нядзеля_панядзелак_аўторак_серада_чацвер_пятніца_субота'.split('_'),
+            isFormat: /\[ ?[Ууў] ?(?:мінулую|наступную)? ?\] ?dddd/
+        },
+        weekdaysShort : 'нд_пн_ат_ср_чц_пт_сб'.split('_'),
+        weekdaysMin : 'нд_пн_ат_ср_чц_пт_сб'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD.MM.YYYY',
+            LL : 'D MMMM YYYY г.',
+            LLL : 'D MMMM YYYY г., HH:mm',
+            LLLL : 'dddd, D MMMM YYYY г., HH:mm'
+        },
+        calendar : {
+            sameDay: '[Сёння ў] LT',
+            nextDay: '[Заўтра ў] LT',
+            lastDay: '[Учора ў] LT',
+            nextWeek: function () {
+                return '[У] dddd [ў] LT';
+            },
+            lastWeek: function () {
+                switch (this.day()) {
+                    case 0:
+                    case 3:
+                    case 5:
+                    case 6:
+                        return '[У мінулую] dddd [ў] LT';
+                    case 1:
+                    case 2:
+                    case 4:
+                        return '[У мінулы] dddd [ў] LT';
+                }
+            },
+            sameElse: 'L'
+        },
+        relativeTime : {
+            future : 'праз %s',
+            past : '%s таму',
+            s : 'некалькі секунд',
+            m : relativeTimeWithPlural,
+            mm : relativeTimeWithPlural,
+            h : relativeTimeWithPlural,
+            hh : relativeTimeWithPlural,
+            d : 'дзень',
+            dd : relativeTimeWithPlural,
+            M : 'месяц',
+            MM : relativeTimeWithPlural,
+            y : 'год',
+            yy : relativeTimeWithPlural
+        },
+        meridiemParse: /ночы|раніцы|дня|вечара/,
+        isPM : function (input) {
+            return /^(дня|вечара)$/.test(input);
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 4) {
+                return 'ночы';
+            } else if (hour < 12) {
+                return 'раніцы';
+            } else if (hour < 17) {
+                return 'дня';
+            } else {
+                return 'вечара';
+            }
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}-(і|ы|га)/,
+        ordinal: function (number, period) {
+            switch (period) {
+                case 'M':
+                case 'd':
+                case 'DDD':
+                case 'w':
+                case 'W':
+                    return (number % 10 === 2 || number % 10 === 3) && (number % 100 !== 12 && number % 100 !== 13) ? number + '-і' : number + '-ы';
+                case 'D':
+                    return number + '-га';
+                default:
+                    return number;
+            }
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
+        }
+    });
+
+    return be;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/bg.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/bg.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var bg = moment.defineLocale('bg', {
+        months : 'януари_февруари_март_април_май_юни_юли_август_септември_октомври_ноември_декември'.split('_'),
+        monthsShort : 'янр_фев_мар_апр_май_юни_юли_авг_сеп_окт_ное_дек'.split('_'),
+        weekdays : 'неделя_понеделник_вторник_сряда_четвъртък_петък_събота'.split('_'),
+        weekdaysShort : 'нед_пон_вто_сря_чет_пет_съб'.split('_'),
+        weekdaysMin : 'нд_пн_вт_ср_чт_пт_сб'.split('_'),
+        longDateFormat : {
+            LT : 'H:mm',
+            LTS : 'H:mm:ss',
+            L : 'D.MM.YYYY',
+            LL : 'D MMMM YYYY',
+            LLL : 'D MMMM YYYY H:mm',
+            LLLL : 'dddd, D MMMM YYYY H:mm'
+        },
+        calendar : {
+            sameDay : '[Днес в] LT',
+            nextDay : '[Утре в] LT',
+            nextWeek : 'dddd [в] LT',
+            lastDay : '[Вчера в] LT',
+            lastWeek : function () {
+                switch (this.day()) {
+                    case 0:
+                    case 3:
+                    case 6:
+                        return '[В изминалата] dddd [в] LT';
+                    case 1:
+                    case 2:
+                    case 4:
+                    case 5:
+                        return '[В изминалия] dddd [в] LT';
+                }
+            },
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : 'след %s',
+            past : 'преди %s',
+            s : 'няколко секунди',
+            ss : '%d секунди',
+            m : 'минута',
+            mm : '%d минути',
+            h : 'час',
+            hh : '%d часа',
+            d : 'ден',
+            dd : '%d дни',
+            M : 'месец',
+            MM : '%d месеца',
+            y : 'година',
+            yy : '%d години'
+        },
+        dayOfMonthOrdinalParse: /\d{1,2}-(ев|ен|ти|ви|ри|ми)/,
+        ordinal : function (number) {
+            var lastDigit = number % 10,
+                last2Digits = number % 100;
+            if (number === 0) {
+                return number + '-ев';
+            } else if (last2Digits === 0) {
+                return number + '-ен';
+            } else if (last2Digits > 10 && last2Digits < 20) {
+                return number + '-ти';
+            } else if (lastDigit === 1) {
+                return number + '-ви';
+            } else if (lastDigit === 2) {
+                return number + '-ри';
+            } else if (lastDigit === 7 || lastDigit === 8) {
+                return number + '-ми';
+            } else {
+                return number + '-ти';
+            }
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 7  // The week that contains Jan 7th is the first week of the year.
+        }
+    });
+
+    return bg;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/bm.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/bm.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var bm = moment.defineLocale('bm', {
+        months : 'Zanwuyekalo_Fewuruyekalo_Marisikalo_Awirilikalo_Mɛkalo_Zuwɛnkalo_Zuluyekalo_Utikalo_Sɛtanburukalo_ɔkutɔburukalo_Nowanburukalo_Desanburukalo'.split('_'),
+        monthsShort : 'Zan_Few_Mar_Awi_Mɛ_Zuw_Zul_Uti_Sɛt_ɔku_Now_Des'.split('_'),
+        weekdays : 'Kari_Ntɛnɛn_Tarata_Araba_Alamisa_Juma_Sibiri'.split('_'),
+        weekdaysShort : 'Kar_Ntɛ_Tar_Ara_Ala_Jum_Sib'.split('_'),
+        weekdaysMin : 'Ka_Nt_Ta_Ar_Al_Ju_Si'.split('_'),
+        longDateFormat : {
+            LT : 'HH:mm',
+            LTS : 'HH:mm:ss',
+            L : 'DD/MM/YYYY',
+            LL : 'MMMM [tile] D [san] YYYY',
+            LLL : 'MMMM [tile] D [san] YYYY [lɛrɛ] HH:mm',
+            LLLL : 'dddd MMMM [tile] D [san] YYYY [lɛrɛ] HH:mm'
+        },
+        calendar : {
+            sameDay : '[Bi lɛrɛ] LT',
+            nextDay : '[Sini lɛrɛ] LT',
+            nextWeek : 'dddd [don lɛrɛ] LT',
+            lastDay : '[Kunu lɛrɛ] LT',
+            lastWeek : 'dddd [tɛmɛnen lɛrɛ] LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : '%s kɔnɔ',
+            past : 'a bɛ %s bɔ',
+            s : 'sanga dama dama',
+            ss : 'sekondi %d',
+            m : 'miniti kelen',
+            mm : 'miniti %d',
+            h : 'lɛrɛ kelen',
+            hh : 'lɛrɛ %d',
+            d : 'tile kelen',
+            dd : 'tile %d',
+            M : 'kalo kelen',
+            MM : 'kalo %d',
+            y : 'san kelen',
+            yy : 'san %d'
+        },
+        week : {
+            dow : 1, // Monday is the first day of the week.
+            doy : 4  // The week that contains Jan 4th is the first week of the year.
+        }
+    });
+
+    return bm;
+
+})));
+
+
+/***/ }),
+
+/***/ "./node_modules/moment/locale/bn.js":
+/*!******************************************!*\
+  !*** ./node_modules/moment/locale/bn.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+//! moment.js locale configuration
+
+;(function (global, factory) {
+    true ? factory(__webpack_require__(/*! ../moment */ "./node_modules/moment/moment.js")) :
+   undefined
+}(this, (function (moment) { 'use strict';
+
+
+    var symbolMap = {
+        '1': '১',
+        '2': '২',
+        '3': '৩',
+        '4': '৪',
