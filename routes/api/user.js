@@ -62,4 +62,28 @@ router.post("/login", async (req, res, next) => {
 
     //Check password
     const isMatch = await bcrypt.compare(password, foundUser.password);
-    if (
+    if (isMatch) {
+      //User matched
+      //Create JWT Payload
+      const payload = {
+        id: foundUser.id,
+        name: foundUser.name
+      };
+
+      //Sign token
+      const token = await jwt.sign(payload, process.env.secretOrKey, {
+        expiresIn: 31556926
+      });
+      res.json({
+        success: true,
+        token: "Bearer " + token
+      });
+    } else {
+      return res.status(400).json({ passwordincorrect: "Password incorrect" });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
