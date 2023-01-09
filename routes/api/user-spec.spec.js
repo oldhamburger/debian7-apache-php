@@ -37,4 +37,10 @@ describe('User routes', () => {
 
       newUser.validate(function(err) {
         expect(err.errors.password.message).to.equal(
-   
+          'Path `password` is required.'
+        );
+        done();
+      });
+    });
+  });
+});
