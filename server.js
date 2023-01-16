@@ -43,4 +43,23 @@ require('./config/passport')(passport);
 app.use('/api/budget', budget);
 
 app.use('/api/users', users);
-app.use(
+app.use('/api/plaid', plaid);
+
+// sends index.html
+app.use('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
+
+// error handling endware
+app.use((err, req, res, next) => {
+  console.error(err);
+  console.error(err.stack);
+  res.status(err.status || 500).send(err.message || 'Internal server error.');
+});
+
+const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
+app.listen(port, () =>
+  console.log(`Getting spriggy with it on port ${port} !`)
+);
+
+module.exports = app;
